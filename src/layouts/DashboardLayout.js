@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { styled, useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
@@ -19,7 +19,7 @@ import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import ListIcon from '@mui/icons-material/ListAlt'
 import TeamIcon from '@mui/icons-material/Group'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 const drawerWidth = 240
 
@@ -88,38 +88,8 @@ const Drawer = styled(MuiDrawer, {
   })
 }))
 
-const generateMenuItems = open => {
-  const items = {
-    Day: <ViewDayIcon />,
-    Week: <ViewWeekIcon />,
-    List: <ListIcon />,
-    Teams: <TeamIcon />
-  }
-
-  return Object.keys(items).map(key => (
-    <ListItemButton
-      key={key}
-      sx={{
-        minHeight: 48,
-        justifyContent: open ? 'initial' : 'center',
-        px: 2.5
-      }}
-    >
-      <ListItemIcon
-        sx={{
-          minWidth: 0,
-          mr: open ? 3 : 'auto',
-          justifyContent: 'center'
-        }}
-      >
-        {items[key]}
-      </ListItemIcon>
-      <ListItemText primary={key} sx={{ opacity: open ? 1 : 0 }} />
-    </ListItemButton>
-  ))
-}
-
 export default function MiniDrawer() {
+  const navigate = useNavigate()
   const theme = useTheme()
   const [open, setOpen] = React.useState(true)
 
@@ -130,6 +100,38 @@ export default function MiniDrawer() {
   const handleDrawerClose = () => {
     setOpen(false)
   }
+
+  const generateMenuItems = useCallback(() => {
+    const items = {
+      Day: <ViewDayIcon />,
+      Week: <ViewWeekIcon />,
+      List: <ListIcon />,
+      Teams: <TeamIcon />
+    }
+
+    return Object.keys(items).map(key => (
+      <ListItemButton
+        key={key}
+        sx={{
+          minHeight: 48,
+          justifyContent: open ? 'initial' : 'center',
+          px: 2.5
+        }}
+        onClick={() => navigate('/day')}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: 0,
+            mr: open ? 3 : 'auto',
+            justifyContent: 'center'
+          }}
+        >
+          {items[key]}
+        </ListItemIcon>
+        <ListItemText primary={key} sx={{ opacity: open ? 1 : 0 }} />
+      </ListItemButton>
+    ))
+  }, [open, navigate])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -168,7 +170,9 @@ export default function MiniDrawer() {
 
         <Divider />
 
-        <List>{useMemo(() => generateMenuItems(open), [open])}</List>
+        <List>
+          {useMemo(() => generateMenuItems(open), [open, generateMenuItems])}
+        </List>
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
