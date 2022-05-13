@@ -102,22 +102,22 @@ export default function MiniDrawer() {
   }
 
   const generateMenuItems = useCallback(() => {
-    const items = {
-      Day: <ViewDayIcon />,
-      Week: <ViewWeekIcon />,
-      List: <ListIcon />,
-      Teams: <TeamIcon />
-    }
+    const items = [
+      { title: 'Day', icon: <ViewDayIcon />, route: 'day' },
+      { title: 'Week', icon: <ViewWeekIcon />, route: 'week' },
+      { title: 'List', icon: <ListIcon />, route: 'list' },
+      { title: 'Teams', icon: <TeamIcon />, route: 'teams' }
+    ]
 
-    return Object.keys(items).map(key => (
+    return items.map(item => (
       <ListItemButton
-        key={key}
+        key={item.route}
         sx={{
           minHeight: 48,
           justifyContent: open ? 'initial' : 'center',
           px: 2.5
         }}
-        onClick={() => navigate('/day')}
+        onClick={() => navigate('/' + item.route)}
       >
         <ListItemIcon
           sx={{
@@ -126,9 +126,9 @@ export default function MiniDrawer() {
             justifyContent: 'center'
           }}
         >
-          {items[key]}
+          {item.icon}
         </ListItemIcon>
-        <ListItemText primary={key} sx={{ opacity: open ? 1 : 0 }} />
+        <ListItemText primary={item.title} sx={{ opacity: open ? 1 : 0 }} />
       </ListItemButton>
     ))
   }, [open, navigate])
