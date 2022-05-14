@@ -2,7 +2,8 @@ import MuiAppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/Menu'
-import { Button, IconButton, styled } from '@mui/material'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { IconButton, styled } from '@mui/material'
 import { drawerWidth } from '../utils/layout'
 
 const AppBar = styled(MuiAppBar, {
@@ -23,7 +24,7 @@ const AppBar = styled(MuiAppBar, {
   })
 }))
 
-export const NavBar = ({ open, onDrawerOpen }) => {
+const NavBar = ({ open, onDrawerOpen, onLoginClick }) => {
   return (
     <AppBar position="fixed" open={open}>
       <Toolbar>
@@ -39,11 +40,23 @@ export const NavBar = ({ open, onDrawerOpen }) => {
         >
           <MenuIcon />
         </IconButton>
+
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           CaLender
         </Typography>
-        <Button color="inherit">Login</Button>
+
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          onClick={onLoginClick}
+          edge="start"
+          sx={{ marginRight: 5 }}
+        >
+          <AccountCircleIcon />
+        </IconButton>
       </Toolbar>
     </AppBar>
   )
 }
+
+export default NavBar

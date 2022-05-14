@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { styled, useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import MuiDrawer from '@mui/material/Drawer'
@@ -17,7 +17,8 @@ import ListIcon from '@mui/icons-material/ListAlt'
 import TeamIcon from '@mui/icons-material/Group'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { drawerWidth } from '../utils/layout'
-import { NavBar } from '../components/NavBar'
+import NavBar from '../components/NavBar'
+import AuthModal from '../components/AuthModal'
 
 const openedMixin = theme => ({
   width: drawerWidth,
@@ -69,7 +70,8 @@ const Drawer = styled(MuiDrawer, {
 export default function MiniDrawer() {
   const navigate = useNavigate()
   const theme = useTheme()
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = useState(true)
+  const [openAuthModal, setOpenAuthModal] = useState(false)
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -115,7 +117,11 @@ export default function MiniDrawer() {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
-      <NavBar open={open} onDrawerOpen={handleDrawerOpen} />
+      <NavBar
+        open={open}
+        onDrawerOpen={handleDrawerOpen}
+        onLoginClick={() => setOpenAuthModal(true)}
+      />
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
@@ -139,6 +145,8 @@ export default function MiniDrawer() {
         <DrawerHeader />
         <Outlet />
       </Box>
+
+      <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)} />
     </Box>
   )
 }
