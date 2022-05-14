@@ -1,6 +1,15 @@
 import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/timegrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import { businessHours } from '../utils/calendar'
 
 export default function Day() {
-  return <FullCalendar plugins={[dayGridPlugin]} initialView="timeGridDay" />
+  return (
+    <FullCalendar
+      plugins={[timeGridPlugin]}
+      initialView="timeGridDay"
+      height="auto"
+      nowIndicator
+      businessHours={businessHours}
+    />
+  )
 }
