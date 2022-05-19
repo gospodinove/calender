@@ -67,7 +67,7 @@ const Drawer = styled(MuiDrawer, {
   })
 }))
 
-export default function MiniDrawer() {
+const DashboardLayout = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const [open, setOpen] = useState(true)
@@ -150,3 +150,5 @@ export default function MiniDrawer() {
     </Box>
   )
 }
+
+export default DashboardLayout

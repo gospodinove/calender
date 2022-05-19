@@ -8,12 +8,25 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import { Box, Tab, Tabs } from '@mui/material'
 import TabPanel from './TabPanel'
+import PropTypes from 'prop-types'
+
+const loginUser = async credentials => {
+  const data = await fetch('http://localhost:8080/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(credentials)
+  })
+
+  return data.json()
+}
 
 const AuthModal = ({ open, onClose }) => {
-  const [value, setValue] = React.useState(0)
+  const [tabIndex, setTabIndex] = React.useState(0)
 
-  const submit = () => {
-    switch (value) {
+  const submit = async event => {
+    switch (tabIndex) {
       case 0:
         console.log('submit login')
         break
@@ -31,8 +44,8 @@ const AuthModal = ({ open, onClose }) => {
       <DialogTitle>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
-            value={value}
-            onChange={(_, newValue) => setValue(newValue)}
+            value={tabIndex}
+            onChange={(_, newValue) => setTabIndex(newValue)}
             aria-label="basic tabs example"
             centered
           >
@@ -42,7 +55,7 @@ const AuthModal = ({ open, onClose }) => {
         </Box>
       </DialogTitle>
       <DialogContent>
-        <TabPanel value={value} index={0}>
+        <TabPanel value={tabIndex} index={0}>
           <DialogContentText>Access your account.</DialogContentText>
           <TextField
             margin="dense"
@@ -63,7 +76,7 @@ const AuthModal = ({ open, onClose }) => {
           {/* TODO: Google login */}
         </TabPanel>
 
-        <TabPanel value={value} index={1}>
+        <TabPanel value={tabIndex} index={1}>
           <DialogContentText>Create a new account.</DialogContentText>
           <TextField
             margin="dense"
@@ -98,6 +111,11 @@ const AuthModal = ({ open, onClose }) => {
       </DialogActions>
     </Dialog>
   )
+}
+
+AuthModal.propTypes = {
+  open: PropTypes.bool,
+  onClose: PropTypes.func
 }
 
 export default AuthModal

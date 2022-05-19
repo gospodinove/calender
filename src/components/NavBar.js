@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { IconButton, styled } from '@mui/material'
 import { drawerWidth } from '../utils/layout'
+import PropTypes from 'prop-types'
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: prop => prop !== 'open'
@@ -57,6 +58,12 @@ const NavBar = ({ open, onDrawerOpen, onLoginClick }) => {
       </Toolbar>
     </AppBar>
   )
+}
+
+NavBar.propTypes = {
+  open: PropTypes.bool,
+  onDrawerOpen: PropTypes.func,
+  onLoginClick: PropTypes.func
 }
 
 export default NavBar
