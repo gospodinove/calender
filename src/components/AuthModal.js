@@ -9,6 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import { Box, Tab, Tabs } from '@mui/material'
 import TabPanel from './TabPanel'
 import PropTypes from 'prop-types'
+import { useDispatch } from 'react-redux'
 
 const loginUser = async credentials => {
   const data = await fetch('http://localhost:8080/login', {
@@ -25,10 +26,14 @@ const loginUser = async credentials => {
 const AuthModal = ({ open, onClose }) => {
   const [tabIndex, setTabIndex] = React.useState(0)
 
-  const submit = async event => {
+  const dispatch = useDispatch()
+
+  const submit = async () => {
     switch (tabIndex) {
       case 0:
-        console.log('submit login')
+        const userData = await loginUser({ username: 'asd', password: 'haha' })
+
+        dispatch({ type: 'user/setToken', payload: userData.token })
         break
       case 1:
         console.log('submit register')
