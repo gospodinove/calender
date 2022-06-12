@@ -14,20 +14,25 @@ import { api } from '../utils/api'
 import { isValidEmail, isValidPassword } from '../utils/validation'
 import { isEmptyObject } from '../utils/objects'
 
+const loginDataInitialState = {
+  email: '',
+  password: '',
+  errors: {}
+}
+
+const registerDataInitialState = {
+  email: '',
+  password: '',
+  firstName: '',
+  lastName: '',
+  errors: {}
+}
+
 const AuthModal = ({ open, onClose }) => {
   const [tabIndex, setTabIndex] = useState(0)
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-    errors: {}
-  })
-
-  const [registerData, setRegisterData] = useState({
-    email: '',
-    password: '',
-    errors: {}
-  })
+  const [loginData, setLoginData] = useState(loginDataInitialState)
+  const [registerData, setRegisterData] = useState(registerDataInitialState)
 
   const dispatch = useDispatch()
 
@@ -105,8 +110,13 @@ const AuthModal = ({ open, onClose }) => {
           break
         }
 
-        const userData = await api('login', 'POST', loginData)
-        dispatch({ type: 'user/setToken', payload: userData.token })
+        const response = await api('login', 'POST', loginData)
+
+        if (response.status === 200) {
+          dispatch({ type: 'user/setToken', payload: response.token })
+        } else {
+          setLoginData({ ...loginData, errors: response.errors })
+        }
         break
       }
       case 1: {
@@ -119,8 +129,13 @@ const AuthModal = ({ open, onClose }) => {
           break
         }
 
-        const userData = await api('register', 'POST', registerData)
-        dispatch({ type: 'user/setToken', payload: userData.token })
+        const response = await api('register', 'POST', registerData)
+
+        if (response.status === 200) {
+          dispatch({ type: 'user/setToken', payload: response.token })
+        } else {
+          setRegisterData({ ...registerData, errors: response.errors })
+        }
         break
       }
       default:
@@ -136,13 +151,21 @@ const AuthModal = ({ open, onClose }) => {
     getRegisterValidationErrors
   ])
 
+  const clearTabData = useCallback(() => {
+    setLoginData(loginDataInitialState)
+    setRegisterData(registerDataInitialState)
+  }, [])
+
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
       <DialogTitle>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs
             value={tabIndex}
-            onChange={(_, newValue) => setTabIndex(newValue)}
+            onChange={(_, newValue) => {
+              setTabIndex(newValue)
+              clearTabData()
+            }}
             aria-label="basic tabs example"
             centered
           >

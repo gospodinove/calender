@@ -22,7 +22,7 @@ MongoClient.connect(
         const user = await users.findOne({ email: req.body.email })
 
         if (!user) {
-          res.status(401).json({ error: 'User does not exist' })
+          res.status(401).json({ errors: { email: 'Email is not registered' } })
           return
         }
 
@@ -36,7 +36,7 @@ MongoClient.connect(
             token: req.body.email + req.body.password
           })
         } else {
-          res.status(400).json({ error: 'Invalid Password' })
+          res.status(400).json({ errors: { password: 'Wrong password' } })
         }
       } catch (err) {
         console.log(err)
@@ -48,7 +48,7 @@ MongoClient.connect(
         const user = await users.findOne({ email: req.body.email })
 
         if (user) {
-          res.status(401).json({ error: 'Email is taken' })
+          res.status(400).json({ errors: { email: 'Email is taken' } })
           return
         }
 
