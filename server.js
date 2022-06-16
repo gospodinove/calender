@@ -1,28 +1,57 @@
 const express = require('express')
 const cors = require('cors')
-const bodyParser = require('body-parser')
 const MongoClient = require('mongodb').MongoClient
 const bcrypt = require('bcrypt')
+const session = require('express-session')
+const dotenv = require('dotenv')
+const MongoStore = require('connect-mongo')
+
+dotenv.config()
 
 const app = express()
 
 MongoClient.connect(
-  'mongodb+srv://root:root@realmcluster.hhded.mongodb.net/?retryWrites=true&w=majority'
+  `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@realmcluster.hhded.mongodb.net/?retryWrites=true&w=majority`
 )
   .then(client => {
     const db = client.db('calender')
 
     const users = db.collection('users')
 
-    app.use(cors())
-    app.use(bodyParser.json())
+    app.use(
+      cors({
+        origin: 'http://localhost:3000',
+        credentials: true
+      })
+    )
 
-    app.use('/login', async (req, res) => {
+    app.use(express.json())
+    app.use(express.urlencoded({ extended: true }))
+
+    app.use(
+      session({
+        name: process.env.SESSION_NAME,
+        secret: process.env.SESSION_SECRET_KEY,
+        saveUninitialized: true,
+        resave: false,
+        store: MongoStore.create({ client, dbName: 'calender' }),
+        cookie: {
+          sameSite: 'lax',
+          secure: false,
+          maxAge: 1000 * 60 * 60 * 24
+        }
+      })
+    )
+
+    app.post('/login', async (req, res) => {
       try {
         const user = await users.findOne({ email: req.body.email })
 
         if (!user) {
-          res.status(401).json({ errors: { email: 'Email is not registered' } })
+          res.json({
+            success: false,
+            errors: { email: 'Email is not registered' }
+          })
           return
         }
 
@@ -32,35 +61,39 @@ MongoClient.connect(
         )
 
         if (validPassword) {
-          res.send({
-            token: req.body.email + req.body.password
-          })
+          req.session.user = user
+
+          res.json({ success: true, user })
         } else {
-          res.status(400).json({ errors: { password: 'Wrong password' } })
+          res.json({ success: false, errors: { password: 'Wrong password' } })
         }
       } catch (err) {
-        console.log(err)
+        res.json({ success: false, errors: { email: 'Something went wrong' } })
       }
     })
 
-    app.use('/register', async (req, res) => {
+    app.post('/register', async (req, res) => {
       try {
         const user = await users.findOne({ email: req.body.email })
 
         if (user) {
-          res.status(400).json({ errors: { email: 'Email is taken' } })
+          res.json({ success: false, errors: { email: 'Email is taken' } })
           return
         }
 
         const salt = await bcrypt.genSalt(10)
         const password = await bcrypt.hash(req.body.password, salt)
-        await users.insertOne({ ...req.body, password })
 
-        res.send({
-          token: req.body.email + req.body.password
+        const newUser = await users.insertOne({ ...req.body, password })
+
+        req.session.user = newUser
+
+        res.json({
+          success: true,
+          user: newUser
         })
       } catch (err) {
-        console.log(err)
+        res.json({ success: false, errors: { email: 'Something went wrong' } })
       }
     })
 

@@ -11,7 +11,10 @@ import TabPanel from './TabPanel'
 import PropTypes from 'prop-types'
 import { useDispatch } from 'react-redux'
 import { api } from '../utils/api'
-import { isValidEmail, isValidPassword } from '../utils/validation'
+import {
+  getLoginValidationErrors,
+  getRegisterValidationErrors
+} from '../utils/validation'
 import { isEmptyObject } from '../utils/objects'
 
 const loginDataInitialState = {
@@ -36,120 +39,67 @@ const AuthModal = ({ open, onClose }) => {
 
   const dispatch = useDispatch()
 
-  const getLoginValidationErrors = useCallback(() => {
-    const email = loginData.email
-    const password = loginData.password
+  const submitLogin = useCallback(async () => {
+    setLoginData({ ...loginData, errors: {} })
 
-    const errors = {}
+    const validationErrors = getLoginValidationErrors(
+      loginData.email,
+      loginData.password
+    )
 
-    if (!email) {
-      errors.email = 'This field is required'
+    if (!isEmptyObject(validationErrors)) {
+      setLoginData({ ...loginData, errors: validationErrors })
+      return
     }
 
-    if (!password) {
-      errors.password = 'This field is required'
+    const response = await api('login', 'POST', loginData)
+
+    if (response.success) {
+      dispatch({ type: 'user/set', payload: response.user })
+    } else {
+      setLoginData({ ...loginData, errors: response.errors })
+    }
+  }, [dispatch, loginData])
+
+  const submitRegister = useCallback(async () => {
+    setRegisterData({ ...registerData, errors: {} })
+
+    const validationErrors = getRegisterValidationErrors(
+      registerData.firstName,
+      registerData.lastName,
+      registerData.email,
+      registerData.password
+    )
+
+    if (!isEmptyObject(validationErrors)) {
+      setRegisterData({ ...registerData, errors: validationErrors })
+      return
     }
 
-    if (!errors.email && !isValidEmail(email)) {
-      errors.email = 'Enter a valid email'
+    const response = await api('register', 'POST', registerData)
+
+    if (response.success) {
+      dispatch({ type: 'user/set', payload: response.user })
+    } else {
+      setRegisterData({ ...registerData, errors: response.errors })
     }
-
-    return errors
-  }, [loginData.email, loginData.password])
-
-  const getRegisterValidationErrors = useCallback(() => {
-    const firstName = registerData.firstName
-    const lastName = registerData.lastName
-    const email = registerData.email
-    const password = registerData.password
-
-    const errors = {}
-
-    if (!firstName) {
-      errors.firstName = 'This field is required'
-    }
-
-    if (!lastName) {
-      errors.lastName = 'This field is required'
-    }
-
-    if (!email) {
-      errors.email = 'This field is required'
-    }
-
-    if (!password) {
-      errors.password = 'This field is required'
-    }
-
-    if (!errors.password && !isValidPassword(password)) {
-      errors.password =
-        'Min 8 characters (capital & lowercase letter, special character)'
-    }
-
-    if (!errors.email && !isValidEmail(email)) {
-      errors.email = 'Enter a valid email'
-    }
-
-    return errors
-  }, [
-    registerData.email,
-    registerData.password,
-    registerData.firstName,
-    registerData.lastName
-  ])
+  }, [dispatch, registerData])
 
   const submit = useCallback(async () => {
     switch (tabIndex) {
       case 0: {
-        setLoginData({ ...loginData, errors: {} })
-
-        const validationErrors = getLoginValidationErrors()
-
-        if (!isEmptyObject(validationErrors)) {
-          setLoginData({ ...loginData, errors: validationErrors })
-          break
-        }
-
-        const response = await api('login', 'POST', loginData)
-
-        if (response.status === 200) {
-          dispatch({ type: 'user/setToken', payload: response.token })
-        } else {
-          setLoginData({ ...loginData, errors: response.errors })
-        }
+        await submitLogin()
         break
       }
       case 1: {
-        setRegisterData({ ...registerData, errors: {} })
-
-        const validationErrors = getRegisterValidationErrors()
-
-        if (!isEmptyObject(validationErrors)) {
-          setRegisterData({ ...registerData, errors: validationErrors })
-          break
-        }
-
-        const response = await api('register', 'POST', registerData)
-
-        if (response.status === 200) {
-          dispatch({ type: 'user/setToken', payload: response.token })
-        } else {
-          setRegisterData({ ...registerData, errors: response.errors })
-        }
+        await submitRegister()
         break
       }
       default:
         console.log('huh?')
         break
     }
-  }, [
-    loginData,
-    registerData,
-    tabIndex,
-    dispatch,
-    getLoginValidationErrors,
-    getRegisterValidationErrors
-  ])
+  }, [submitLogin, submitRegister, tabIndex])
 
   const clearTabData = useCallback(() => {
     setLoginData(loginDataInitialState)
@@ -174,108 +124,121 @@ const AuthModal = ({ open, onClose }) => {
           </Tabs>
         </Box>
       </DialogTitle>
-      <DialogContent>
-        <TabPanel value={tabIndex} index={0}>
-          <DialogContentText>Access your account.</DialogContentText>
-          <TextField
-            margin="dense"
-            id="login-email"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setLoginData({ ...loginData, email: event.target.value })
-            }
-            error={loginData.errors.email !== undefined}
-            helperText={loginData.errors.email}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="login-password"
-            label="Password"
-            type="password"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setLoginData({ ...loginData, password: event.target.value })
-            }
-            error={loginData.errors.password !== undefined}
-            helperText={loginData.errors.password}
-            required
-          />
-          {/* TODO: Google login */}
-        </TabPanel>
+      <form
+        onSubmit={e => {
+          e.preventDefault()
+          submit()
+        }}
+      >
+        <DialogContent>
+          <TabPanel value={tabIndex} index={0}>
+            <DialogContentText>Access your account.</DialogContentText>
+            <TextField
+              margin="dense"
+              id="login-email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setLoginData({ ...loginData, email: event.target.value })
+              }
+              error={loginData.errors.email !== undefined}
+              helperText={loginData.errors.email}
+              required
+            />
+            <TextField
+              margin="dense"
+              id="login-password"
+              label="Password"
+              type="password"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setLoginData({ ...loginData, password: event.target.value })
+              }
+              error={loginData.errors.password !== undefined}
+              helperText={loginData.errors.password}
+              required
+            />
+            {/* TODO: Google login */}
+          </TabPanel>
 
-        <TabPanel value={tabIndex} index={1}>
-          <DialogContentText>Create a new account.</DialogContentText>
-          <TextField
-            margin="dense"
-            id="register-name"
-            label="First name"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setRegisterData({
-                ...registerData,
-                firstName: event.target.value
-              })
-            }
-            error={registerData.errors.firstName !== undefined}
-            helperText={registerData.errors.firstName}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="register-name"
-            label="Last name"
-            type="text"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setRegisterData({ ...registerData, lastName: event.target.value })
-            }
-            error={registerData.errors.lastName !== undefined}
-            helperText={registerData.errors.lastName}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="register-email"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setRegisterData({ ...registerData, email: event.target.value })
-            }
-            error={registerData.errors.email !== undefined}
-            helperText={registerData.errors.email}
-            required
-          />
-          <TextField
-            margin="dense"
-            id="register-password"
-            label="Password"
-            type="password"
-            fullWidth
-            variant="standard"
-            onChange={event =>
-              setRegisterData({ ...registerData, password: event.target.value })
-            }
-            error={registerData.errors.password !== undefined}
-            helperText={registerData.errors.password}
-            required
-          />
-        </TabPanel>
-      </DialogContent>
+          <TabPanel value={tabIndex} index={1}>
+            <DialogContentText>Create a new account.</DialogContentText>
+            <TextField
+              margin="dense"
+              id="register-name"
+              label="First name"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setRegisterData({
+                  ...registerData,
+                  firstName: event.target.value
+                })
+              }
+              error={registerData.errors.firstName !== undefined}
+              helperText={registerData.errors.firstName}
+              required
+            />
+            <TextField
+              margin="dense"
+              id="register-name"
+              label="Last name"
+              type="text"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setRegisterData({
+                  ...registerData,
+                  lastName: event.target.value
+                })
+              }
+              error={registerData.errors.lastName !== undefined}
+              helperText={registerData.errors.lastName}
+              required
+            />
+            <TextField
+              margin="dense"
+              id="register-email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setRegisterData({ ...registerData, email: event.target.value })
+              }
+              error={registerData.errors.email !== undefined}
+              helperText={registerData.errors.email}
+              required
+            />
+            <TextField
+              margin="dense"
+              id="register-password"
+              label="Password"
+              type="password"
+              fullWidth
+              variant="standard"
+              onChange={event =>
+                setRegisterData({
+                  ...registerData,
+                  password: event.target.value
+                })
+              }
+              error={registerData.errors.password !== undefined}
+              helperText={registerData.errors.password}
+              required
+            />
+          </TabPanel>
+        </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={submit}>Submit</Button>
-      </DialogActions>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit">Submit</Button>
+        </DialogActions>
+      </form>
     </Dialog>
   )
 }
