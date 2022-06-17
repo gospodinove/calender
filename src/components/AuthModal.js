@@ -55,7 +55,7 @@ const AuthModal = ({ open, onClose }) => {
     const response = await api('login', 'POST', loginData)
 
     if (response.success) {
-      dispatch({ type: 'user/set', payload: response.user })
+      dispatch({ type: 'auth/setUser', payload: response.user })
     } else {
       setLoginData({ ...loginData, errors: response.errors })
     }
@@ -79,7 +79,7 @@ const AuthModal = ({ open, onClose }) => {
     const response = await api('register', 'POST', registerData)
 
     if (response.success) {
-      dispatch({ type: 'user/set', payload: response.user })
+      dispatch({ type: 'auth/setUser', payload: response.user })
     } else {
       setRegisterData({ ...registerData, errors: response.errors })
     }
@@ -89,17 +89,19 @@ const AuthModal = ({ open, onClose }) => {
     switch (tabIndex) {
       case 0: {
         await submitLogin()
+        onClose()
         break
       }
       case 1: {
         await submitRegister()
+        onClose()
         break
       }
       default:
         console.log('huh?')
         break
     }
-  }, [submitLogin, submitRegister, tabIndex])
+  }, [submitLogin, submitRegister, tabIndex, onClose])
 
   const clearTabData = useCallback(() => {
     setLoginData(loginDataInitialState)

@@ -17,8 +17,12 @@ import ListIcon from '@mui/icons-material/ListAlt'
 import TeamIcon from '@mui/icons-material/Group'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { drawerWidth } from '../utils/layout'
-import NavBar from '../components/NavBar'
 import AuthModal from '../components/AuthModal'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppBar, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { api } from '../utils/api'
 
 const openedMixin = theme => ({
   width: drawerWidth,
@@ -70,16 +74,37 @@ const Drawer = styled(MuiDrawer, {
 const DashboardLayout = () => {
   const navigate = useNavigate()
   const theme = useTheme()
-  const [open, setOpen] = useState(true)
-  const [openAuthModal, setOpenAuthModal] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(true)
 
-  const handleDrawerOpen = () => {
-    setOpen(true)
-  }
+  const [userMenuAnchorElement, setUserMenuAnchorElement] = useState(null)
 
-  const handleDrawerClose = () => {
-    setOpen(false)
-  }
+  const user = useSelector(state => state.auth.user)
+
+  const isAuthModalOpen = useSelector(state => state.auth.isAuthModalOpen)
+
+  const dispatch = useDispatch()
+
+  const setIsAuthModalOpen = useCallback(
+    open => {
+      dispatch({ type: `auth/${open ? 'show' : 'hide'}AuthModal` })
+    },
+    [dispatch]
+  )
+
+  const onDrawerToggle = useCallback(() => {
+    setIsDrawerOpen(!isDrawerOpen)
+  }, [isDrawerOpen, setIsDrawerOpen])
+
+  const onUserMenuToggle = useCallback(
+    event => {
+      setUserMenuAnchorElement(event.currentTarget)
+    },
+    [setUserMenuAnchorElement]
+  )
+
+  const onUserMenuClose = useCallback(() => {
+    setUserMenuAnchorElement(null)
+  }, [setUserMenuAnchorElement])
 
   const generateMenuItems = useCallback(() => {
     const items = [
@@ -94,7 +119,7 @@ const DashboardLayout = () => {
         key={item.route}
         sx={{
           minHeight: 48,
-          justifyContent: open ? 'initial' : 'center',
+          justifyContent: isDrawerOpen ? 'initial' : 'center',
           px: 2.5
         }}
         onClick={() => navigate('/' + item.route)}
@@ -102,30 +127,104 @@ const DashboardLayout = () => {
         <ListItemIcon
           sx={{
             minWidth: 0,
-            mr: open ? 3 : 'auto',
+            mr: isDrawerOpen ? 3 : 'auto',
             justifyContent: 'center'
           }}
         >
           {item.icon}
         </ListItemIcon>
-        <ListItemText primary={item.title} sx={{ opacity: open ? 1 : 0 }} />
+        <ListItemText
+          primary={item.title}
+          sx={{ opacity: isDrawerOpen ? 1 : 0 }}
+        />
       </ListItemButton>
     ))
-  }, [open, navigate])
+  }, [isDrawerOpen, navigate])
+
+  const onUserMenuClick = useCallback(
+    event => {
+      if (!user) {
+        setIsAuthModalOpen(true)
+        return
+      }
+
+      onUserMenuToggle(event)
+    },
+    [setIsAuthModalOpen, onUserMenuToggle, user]
+  )
+
+  const onLogout = useCallback(async () => {
+    const response = await api('logout')
+
+    onUserMenuClose()
+
+    if (!response.success) {
+      // TODO: Show a toast with error
+      console.log(response.error)
+      return
+    }
+
+    dispatch({ type: 'auth/setUser', payload: undefined })
+  }, [dispatch, onUserMenuClose])
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
-      <NavBar
-        open={open}
-        onDrawerOpen={handleDrawerOpen}
-        onLoginClick={() => setOpenAuthModal(true)}
-      />
+      <AppBar position="fixed" open={isDrawerOpen}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={onDrawerToggle}
+            edge="start"
+            sx={{
+              marginRight: 5,
+              ...(isDrawerOpen && { display: 'none' })
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
 
-      <Drawer variant="permanent" open={open}>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            CaLender
+          </Typography>
+
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={onUserMenuClick}
+            edge="start"
+            sx={{ marginRight: 5 }}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+
+          <Menu
+            id="menu-appbar"
+            anchorEl={userMenuAnchorElement}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+            open={userMenuAnchorElement !== null}
+            onClose={onUserMenuClose}
+          >
+            <MenuItem onClick={onUserMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={onUserMenuClose}>My account</MenuItem>
+            <MenuItem onClick={onLogout}>Log out</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer variant="permanent" open={isDrawerOpen}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton onClick={onDrawerToggle}>
             {theme.direction === 'rtl' ? (
               <ChevronRightIcon />
             ) : (
@@ -137,7 +236,10 @@ const DashboardLayout = () => {
         <Divider />
 
         <List>
-          {useMemo(() => generateMenuItems(open), [open, generateMenuItems])}
+          {useMemo(
+            () => generateMenuItems(isDrawerOpen),
+            [isDrawerOpen, generateMenuItems]
+          )}
         </List>
       </Drawer>
 
@@ -146,7 +248,10 @@ const DashboardLayout = () => {
         <Outlet />
       </Box>
 
-      <AuthModal open={openAuthModal} onClose={() => setOpenAuthModal(false)} />
+      <AuthModal
+        open={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </Box>
   )
 }

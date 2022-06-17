@@ -1,8 +1,8 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { userSlice } from './userSlice'
+import { authSlice } from './authSlice'
 
 export const slices = {
-  user: userSlice
+  auth: authSlice
 }
 
 const reducers = Object.values(slices).reduce((acc, slice) => {

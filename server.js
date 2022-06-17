@@ -97,6 +97,31 @@ MongoClient.connect(
       }
     })
 
+    app.get('/session-user', (req, res) => {
+      res.json({ user: req.session.user })
+    })
+
+    app.get('/logout', (req, res) => {
+      try {
+        const user = req.session.user
+
+        if (user) {
+          req.session.destroy(err => {
+            if (err) {
+              throw err
+            }
+
+            res.clearCookie(process.env.SESSION_NAME)
+            res.json({ success: true })
+          })
+        } else {
+          throw new Error('Something went wrong')
+        }
+      } catch (err) {
+        res.json({ success: false, error: 'Something went wrong' })
+      }
+    })
+
     app.listen(8080, () =>
       console.log('API is running on http://localhost:8080')
     )
