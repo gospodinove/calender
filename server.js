@@ -38,7 +38,7 @@ MongoClient.connect(
         cookie: {
           sameSite: 'lax',
           secure: false,
-          maxAge: 1000 * 60 * 60 * 24
+          maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
         }
       })
     )
