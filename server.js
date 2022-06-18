@@ -5,10 +5,43 @@ const bcrypt = require('bcrypt')
 const session = require('express-session')
 const dotenv = require('dotenv')
 const MongoStore = require('connect-mongo')
+const { validate } = require('indicative/validator')
+const { getValue, skippable } = require('indicative-utils')
+const { extend } = require('indicative/validator')
 
 dotenv.config()
 
 const app = express()
+
+const messages = {
+  required: 'This field is required',
+  email: 'Enter valid email address',
+  password: 'Min 8 characters (capital & lowercase letter, special character)'
+}
+
+extend('password', {
+  async: true,
+
+  compile(args) {
+    return args
+  },
+
+  async validate(data, field, args, config) {
+    const fieldValue = getValue(data, field)
+
+    if (skippable(fieldValue, field, config)) {
+      return true
+    }
+
+    return (
+      /[A-Z]/.test(fieldValue) &&
+      /[a-z]/.test(fieldValue) &&
+      /[0-9]/.test(fieldValue) &&
+      /[^A-Za-z0-9]/.test(fieldValue) &&
+      fieldValue.length >= 8
+    )
+  }
+})
 
 MongoClient.connect(
   `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@realmcluster.hhded.mongodb.net/?retryWrites=true&w=majority`
@@ -45,12 +78,19 @@ MongoClient.connect(
 
     app.post('/login', async (req, res) => {
       try {
+        const schema = {
+          email: 'required|email',
+          password: 'required'
+        }
+
+        await validate(req.body, schema, messages)
+
         const user = await users.findOne({ email: req.body.email })
 
         if (!user) {
           res.json({
             success: false,
-            errors: { email: 'Email is not registered' }
+            errors: [{ message: 'Email is not registered', field: 'email' }]
           })
           return
         }
@@ -65,19 +105,34 @@ MongoClient.connect(
 
           res.json({ success: true, user })
         } else {
-          res.json({ success: false, errors: { password: 'Wrong password' } })
+          res.json({
+            success: false,
+            errors: [{ message: 'Wrong password', field: 'password' }]
+          })
         }
-      } catch (err) {
-        res.json({ success: false, errors: { email: 'Something went wrong' } })
+      } catch (errors) {
+        res.json({ success: false, errors })
       }
     })
 
     app.post('/register', async (req, res) => {
       try {
+        const schema = {
+          firstName: 'required|string',
+          lastName: 'required|string',
+          email: 'required|email',
+          password: 'required|password'
+        }
+
+        await validate(req.body, schema, messages)
+
         const user = await users.findOne({ email: req.body.email })
 
         if (user) {
-          res.json({ success: false, errors: { email: 'Email is taken' } })
+          res.json({
+            success: false,
+            errors: [{ field: 'email', message: 'Email is taken' }]
+          })
           return
         }
 
@@ -92,8 +147,8 @@ MongoClient.connect(
           success: true,
           user: newUser
         })
-      } catch (err) {
-        res.json({ success: false, errors: { email: 'Something went wrong' } })
+      } catch (errors) {
+        res.json({ success: false, errors })
       }
     })
 

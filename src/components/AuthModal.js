@@ -11,11 +11,6 @@ import TabPanel from './TabPanel'
 import PropTypes from 'prop-types'
 import { useDispatch } from 'react-redux'
 import { api } from '../utils/api'
-import {
-  getLoginValidationErrors,
-  getRegisterValidationErrors
-} from '../utils/validation'
-import { isEmptyObject } from '../utils/objects'
 
 const loginDataInitialState = {
   email: '',
@@ -31,6 +26,16 @@ const registerDataInitialState = {
   errors: {}
 }
 
+const parseErrorMessages = errors => {
+  const result = {}
+
+  for (const err of errors) {
+    errors[err.field] = err.message
+  }
+
+  return result
+}
+
 const AuthModal = ({ open, onClose }) => {
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -42,64 +47,54 @@ const AuthModal = ({ open, onClose }) => {
   const submitLogin = useCallback(async () => {
     setLoginData({ ...loginData, errors: {} })
 
-    const validationErrors = getLoginValidationErrors(
-      loginData.email,
-      loginData.password
-    )
-
-    if (!isEmptyObject(validationErrors)) {
-      setLoginData({ ...loginData, errors: validationErrors })
-      return
-    }
-
     const response = await api('login', 'POST', loginData)
 
     if (response.success) {
       dispatch({ type: 'auth/setUser', payload: response.user })
     } else {
-      setLoginData({ ...loginData, errors: response.errors })
+      setLoginData({
+        ...loginData,
+        errors: parseErrorMessages(response.errors)
+      })
+      throw new Error('Could not log in')
     }
   }, [dispatch, loginData])
 
   const submitRegister = useCallback(async () => {
     setRegisterData({ ...registerData, errors: {} })
 
-    const validationErrors = getRegisterValidationErrors(
-      registerData.firstName,
-      registerData.lastName,
-      registerData.email,
-      registerData.password
-    )
-
-    if (!isEmptyObject(validationErrors)) {
-      setRegisterData({ ...registerData, errors: validationErrors })
-      return
-    }
-
     const response = await api('register', 'POST', registerData)
 
     if (response.success) {
       dispatch({ type: 'auth/setUser', payload: response.user })
     } else {
-      setRegisterData({ ...registerData, errors: response.errors })
+      setRegisterData({
+        ...registerData,
+        errors: parseErrorMessages(response.errors)
+      })
+      throw new Error('Could not register')
     }
   }, [dispatch, registerData])
 
   const submit = useCallback(async () => {
-    switch (tabIndex) {
-      case 0: {
-        await submitLogin()
-        onClose()
-        break
+    try {
+      switch (tabIndex) {
+        case 0: {
+          await submitLogin()
+          onClose()
+          break
+        }
+        case 1: {
+          await submitRegister()
+          onClose()
+          break
+        }
+        default:
+          console.log('huh?')
+          break
       }
-      case 1: {
-        await submitRegister()
-        onClose()
-        break
-      }
-      default:
-        console.log('huh?')
-        break
+    } catch (err) {
+      console.log(err)
     }
   }, [submitLogin, submitRegister, tabIndex, onClose])
 
