@@ -2,7 +2,7 @@ import { baseUrl } from '../constants'
 
 export const api = async (url, method = 'GET', data) =>
   (
-    await fetch(baseUrl + '/' + url, {
+    await fetch(baseUrl + '/api/' + url, {
       method,
       headers: {
         'Content-Type': 'application/json'
