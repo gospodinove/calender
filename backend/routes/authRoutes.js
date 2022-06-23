@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const { validate } = require('indicative/validator')
 const { getValue, skippable } = require('indicative-utils')
 const { extend } = require('indicative/validator')
+const { replace_id } = require('../utils')
 
 const router = express.Router()
 
@@ -57,18 +58,25 @@ router.post('/login', async (req, res) => {
       return
     }
 
-    const validPassword = await bcrypt.compare(req.body.password, user.password)
+    const isPasswordValid = await bcrypt.compare(
+      req.body.password,
+      user.password
+    )
 
-    if (validPassword) {
-      req.session.user = user
-
-      res.json({ success: true, user })
-    } else {
+    if (!isPasswordValid) {
       res.json({
         success: false,
         errors: [{ message: 'Wrong password', field: 'password' }]
       })
+      return
     }
+
+    replace_id(user)
+
+    delete user.password
+
+    req.session.user = user
+    res.json({ success: true, user })
   } catch (errors) {
     res.json({ success: false, errors })
   }
@@ -87,9 +95,11 @@ router.post('/register', async (req, res) => {
 
     await validate(req.body, schema, messages)
 
-    const user = await db.collection('users').findOne({ email: req.body.email })
+    const registeredUser = await db
+      .collection('users')
+      .findOne({ email: req.body.email })
 
-    if (user) {
+    if (registeredUser) {
       res.json({
         success: false,
         errors: [{ field: 'email', message: 'Email is taken' }]
@@ -105,6 +115,10 @@ router.post('/register', async (req, res) => {
       .insertOne({ ...req.body, password })
 
     req.session.user = newUser
+
+    replace_id(newUser)
+
+    delete newUser.password
 
     res.json({
       success: true,
