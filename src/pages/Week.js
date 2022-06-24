@@ -2,21 +2,23 @@ import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { businessHours } from '../utils/calendar'
+import PropTypes from 'prop-types'
 
-export default function Week() {
+export default function Week({ onTimeSelected }) {
   return (
     <FullCalendar
       plugins={[timeGridPlugin, interactionPlugin]}
       initialView="timeGridWeek"
+      allDaySlot={false}
       height="auto"
       nowIndicator
-      businessHours={businessHours}
       firstDay={1}
       selectable
-      select={data => {
-        // TODO: create events here
-        console.log(data)
-      }}
+      select={onTimeSelected}
     />
   )
+}
+
+Week.propTypes = {
+  onTimeSelected: PropTypes.func
 }

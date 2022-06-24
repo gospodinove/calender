@@ -1,21 +1,22 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { businessHours } from '../utils/calendar'
+import PropTypes from 'prop-types'
 
-export default function Day() {
+export default function Day({ onTimeSelected }) {
   return (
     <FullCalendar
       plugins={[timeGridPlugin, interactionPlugin]}
       initialView="timeGridDay"
+      allDaySlot={false}
       height="auto"
       nowIndicator
-      businessHours={businessHours}
       selectable
-      select={data => {
-        // TODO: create events here
-        console.log(data)
-      }}
+      select={onTimeSelected}
     />
   )
+}
+
+Day.propTypes = {
+  onTimeSelected: PropTypes.func
 }

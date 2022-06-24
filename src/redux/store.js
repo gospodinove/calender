@@ -1,8 +1,12 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { authSlice } from './authSlice'
+import { eventsSlice } from './eventsSlice'
+import { modalsSlice } from './modalsSlice'
 
 export const slices = {
-  auth: authSlice
+  auth: authSlice,
+  events: eventsSlice,
+  modals: modalsSlice
 }
 
 const reducers = Object.values(slices).reduce((acc, slice) => {

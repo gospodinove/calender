@@ -23,6 +23,7 @@ import { AppBar, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
+import CreateEventModal from '../components/CreateEventModal'
 
 const openedMixin = theme => ({
   width: drawerWidth,
@@ -72,6 +73,8 @@ const Drawer = styled(MuiDrawer, {
 }))
 
 const DashboardLayout = () => {
+  const dispatch = useDispatch()
+
   const navigate = useNavigate()
   const theme = useTheme()
   const [isDrawerOpen, setIsDrawerOpen] = useState(true)
@@ -80,14 +83,25 @@ const DashboardLayout = () => {
 
   const user = useSelector(state => state.auth.user)
 
-  const isAuthModalOpen = useSelector(state => state.auth.isAuthModalOpen)
-
-  const dispatch = useDispatch()
-
+  const isAuthModalOpen = useSelector(state => state.modals.auth?.open ?? false)
   const setIsAuthModalOpen = useCallback(
-    open => {
-      dispatch({ type: `auth/${open ? 'show' : 'hide'}AuthModal` })
-    },
+    open =>
+      dispatch({
+        type: `modals/${open ? 'show' : 'hide'}`,
+        payload: { modal: 'auth' }
+      }),
+    [dispatch]
+  )
+
+  const isCreateEventModalOpen = useSelector(
+    state => state.modals.createEvent?.open ?? false
+  )
+  const setIsCreateEventModalOpen = useCallback(
+    (open, data) =>
+      dispatch({
+        type: `modals/${open ? 'show' : 'hide'}`,
+        payload: { modal: 'createEvent', data }
+      }),
     [dispatch]
   )
 
@@ -251,6 +265,11 @@ const DashboardLayout = () => {
       <AuthModal
         open={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      <CreateEventModal
+        open={isCreateEventModalOpen}
+        onClose={() => setIsCreateEventModalOpen(false)}
       />
     </Box>
   )

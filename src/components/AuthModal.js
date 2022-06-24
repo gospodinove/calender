@@ -136,7 +136,6 @@ const AuthModal = ({ open, onClose }) => {
               label="Email Address"
               type="email"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setLoginData({ ...loginData, email: event.target.value })
               }
@@ -150,7 +149,6 @@ const AuthModal = ({ open, onClose }) => {
               label="Password"
               type="password"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setLoginData({ ...loginData, password: event.target.value })
               }
@@ -169,7 +167,6 @@ const AuthModal = ({ open, onClose }) => {
               label="First name"
               type="text"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setRegisterData({
                   ...registerData,
@@ -186,7 +183,6 @@ const AuthModal = ({ open, onClose }) => {
               label="Last name"
               type="text"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setRegisterData({
                   ...registerData,
@@ -203,7 +199,6 @@ const AuthModal = ({ open, onClose }) => {
               label="Email Address"
               type="email"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setRegisterData({ ...registerData, email: event.target.value })
               }
@@ -217,7 +212,6 @@ const AuthModal = ({ open, onClose }) => {
               label="Password"
               type="password"
               fullWidth
-              variant="standard"
               onChange={event =>
                 setRegisterData({
                   ...registerData,

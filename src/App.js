@@ -8,9 +8,10 @@ import Day from './pages/Day'
 import List from './pages/List'
 import Week from './pages/Week'
 import { useDispatch } from 'react-redux'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
+import { cleanEventData } from './utils/events'
 
 function App() {
   const dispatch = useDispatch()
@@ -27,12 +28,22 @@ function App() {
     checkLoggedIn()
   }, [dispatch])
 
+  const onTimeSelected = useCallback(
+    eventData => {
+      dispatch({
+        type: 'modals/show',
+        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
+      })
+    },
+    [dispatch]
+  )
+
   return (
     <Routes>
       <Route path="/" element={<DashboardLayout />}>
         <Route path="/" element={<Navigate to="/day" />} />
-        <Route path="day" element={<Day />} />
-        <Route path="week" element={<Week />} />
+        <Route path="day" element={<Day onTimeSelected={onTimeSelected} />} />
+        <Route path="week" element={<Week onTimeSelected={onTimeSelected} />} />
         <Route path="list" element={<List />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
