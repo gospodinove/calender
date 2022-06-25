@@ -1,41 +1,16 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
 const { validate } = require('indicative/validator')
-const { getValue, skippable } = require('indicative-utils')
 const { extend } = require('indicative/validator')
 const { replace_id } = require('../utils')
+const {
+  passwordValidator,
+  validationMessages: messages
+} = require('../validation')
 
 const router = express.Router()
 
-const messages = {
-  required: 'This field is required',
-  email: 'Enter valid email address',
-  password: 'Min 8 characters (capital & lowercase letter, special character)'
-}
-
-extend('password', {
-  async: true,
-
-  compile(args) {
-    return args
-  },
-
-  async validate(data, field, args, config) {
-    const fieldValue = getValue(data, field)
-
-    if (skippable(fieldValue, field, config)) {
-      return true
-    }
-
-    return (
-      /[A-Z]/.test(fieldValue) &&
-      /[a-z]/.test(fieldValue) &&
-      /[0-9]/.test(fieldValue) &&
-      /[^A-Za-z0-9]/.test(fieldValue) &&
-      fieldValue.length >= 8
-    )
-  }
-})
+extend('password', passwordValidator)
 
 router.post('/login', async (req, res) => {
   const db = req.app.locals.db
@@ -110,27 +85,24 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const password = await bcrypt.hash(req.body.password, salt)
 
-    const newUser = await db
-      .collection('users')
-      .insertOne({ ...req.body, password })
+    const user = { ...req.body, password }
 
-    req.session.user = newUser
+    await db.collection('users').insertOne(user)
 
-    replace_id(newUser)
+    replace_id(user)
 
-    delete newUser.password
+    delete user.password
 
-    res.json({
-      success: true,
-      user: newUser
-    })
+    req.session.user = user
+
+    res.json({ success: true, user })
   } catch (errors) {
     res.json({ success: false, errors })
   }
 })
 
 router.get('/session-user', (req, res) => {
-  res.json({ user: req.session.user })
+  res.json(req.session.user)
 })
 
 router.get('/logout', (req, res) => {
