@@ -21,7 +21,7 @@ function App() {
       const user = await api('session-user')
 
       if (user && !isEmptyObject(user)) {
-        dispatch({ type: 'auth/setUser', payload: { user } })
+        dispatch({ type: 'auth/setUser', payload: user })
       }
     }
 

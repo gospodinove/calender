@@ -6,9 +6,10 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import PropTypes from 'prop-types'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import Grid from '@mui/material/Grid'
+import { api } from '../utils/api'
 
 const parseErrorMessages = errors => {
   const result = {}
@@ -21,9 +22,11 @@ const parseErrorMessages = errors => {
 }
 
 const CreateEventModal = ({ open, onClose }) => {
+  const dispatch = useDispatch()
+
   const initialData = useSelector(state => state.modals.createEvent?.data)
 
-  const [name, setName] = useState('')
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
   const [start, setStart] = useState(null)
@@ -36,10 +39,24 @@ const CreateEventModal = ({ open, onClose }) => {
 
   const submit = useCallback(async () => {
     try {
+      const response = await api('events', 'POST', {
+        title,
+        description,
+        start,
+        end
+      })
+
+      if (!response.success) {
+        throw Error('Something went wrong')
+      }
+
+      dispatch({ type: 'events/add', payload: response.event })
+
+      onClose()
     } catch (err) {
       console.log(err)
     }
-  }, [])
+  }, [title, description, start, end, dispatch, onClose])
 
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
@@ -57,7 +74,7 @@ const CreateEventModal = ({ open, onClose }) => {
             label="Name"
             type="text"
             fullWidth
-            onChange={event => setName(event.target.value)}
+            onChange={event => setTitle(event.target.value)}
             // error={loginData.errors.email !== undefined}
             // helperText={loginData.errors.email}
             required
@@ -75,7 +92,6 @@ const CreateEventModal = ({ open, onClose }) => {
             onChange={event => setDescription(event.target.value)}
             // error={loginData.errors.email !== undefined}
             // helperText={loginData.errors.email}
-            required
           />
 
           <Grid container spacing={1} sx={{ marginTop: '10px' }}>

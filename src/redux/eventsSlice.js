@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit'
 import { formatDate } from '../utils/formatters'
 
 const initialState = {
-  createEventModalData: null,
   eventsForDate: {}
 }
 
@@ -11,7 +10,12 @@ export const eventsSlice = createSlice({
   initialState,
   reducers: {
     add: (state, action) => {
-      state[formatDate(action.payload.start)] = action.payload
+      const startDate = new Date(action.payload.start)
+      const key = formatDate(startDate)
+
+      const oldValue = state[key] ?? []
+
+      state[key] = [...oldValue, action.payload]
     }
   }
 })
