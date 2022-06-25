@@ -12,6 +12,7 @@ import { useCallback, useEffect } from 'react'
 import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
 import { cleanEventData } from './utils/events'
+import { formatDate } from './utils/formatters'
 
 function App() {
   const dispatch = useDispatch()
@@ -41,16 +42,38 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<DashboardLayout />}>
-        <Route path="/" element={<Navigate to="/day" />} />
-        <Route path="day" element={<Day onTimeSelected={onTimeSelected} />} />
-        <Route path="week" element={<Week onTimeSelected={onTimeSelected} />} />
+        <Route
+          path="day/:date"
+          element={<Day onTimeSelected={onTimeSelected} />}
+        />
+        <Route
+          path="week/:date"
+          element={<Week onTimeSelected={onTimeSelected} />}
+        />
         <Route path="list" element={<List />} />
+
+        {/* Auth */}
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
+
         <Route path="404" element={<NotFound />} />
+
         <Route path="*" element={<Navigate to="/404" />} />
+
+        {/* Redirects */}
+        <Route
+          path="/"
+          element={<Navigate to={`/day/${formatDate(new Date())}`} />}
+        />
+        <Route
+          path="day"
+          element={<Navigate to={`/day/${formatDate(new Date())}`} />}
+        />
+        <Route
+          path="week"
+          element={<Navigate to={`/week/${formatDate(new Date())}`} />}
+        />
       </Route>
-      <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   )
 }
