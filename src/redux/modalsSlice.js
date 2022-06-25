@@ -10,16 +10,13 @@ export const modalsSlice = createSlice({
     show: (state, action) => {
       const modalState = { open: true }
 
-      if (!action.payload.data) {
-        return
+      if (action.payload.data) {
+        modalState.data = action.payload.data
       }
-
-      modalState.data = action.payload.data
 
       state[action.payload.modal] = modalState
     },
     hide: (state, action) => {
-      console.log(action.payload)
       state[action.payload.modal] = undefined
     }
   }
