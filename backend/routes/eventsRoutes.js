@@ -1,7 +1,7 @@
 const express = require('express')
 const { validate } = require('indicative/validator')
 const isAuthenticated = require('../middleware/isAuthenticated')
-const { replaceId } = require('../utils')
+const { replaceId, sendErrorResponse } = require('../utils')
 const { validationMessages } = require('../validation')
 
 const router = express.Router()
@@ -15,17 +15,21 @@ router.post('', isAuthenticated, async (req, res) => {
     const schema = {
       title: 'required|string',
       description: 'string|max:250',
-      start: 'required|date',
-      end: 'required|date'
+      start: `required|date|before:${new Date(event.end)}`,
+      end: `required|date|after:${new Date(event.start)}`
     }
 
     await validate(event, schema, validationMessages)
 
-    await db.collection('events').insertOne(event)
+    try {
+      await db.collection('events').insertOne(event)
 
-    res.json({ success: true, event: replaceId(event) })
+      res.json({ success: true, event: replaceId(event) })
+    } catch (err) {
+      sendErrorResponse(res, 500, 'general', 'Could not create event')
+    }
   } catch (errors) {
-    res.json({ success: false, errors })
+    sendErrorResponse(res, 500, 'validation-error', errors)
   }
 })
 
@@ -49,7 +53,7 @@ router.get('', isAuthenticated, async (req, res) => {
 
     res.json({ success: true, events: events.map(e => replaceId(e)) })
   } catch (errors) {
-    res.json({ success: false, errors })
+    sendErrorResponse(res, 500, { main: 'Something went wrong' }, errors)
   }
 })
 

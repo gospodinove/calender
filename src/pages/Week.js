@@ -22,20 +22,22 @@ export default function Week({ onTimeSelected }) {
   )
 
   const fetchEvents = useCallback(async () => {
-    const response = await api('events', 'GET', {
-      startDate: params.startDate,
-      endDate: params.endDate
-    })
+    try {
+      const response = await api('events', 'GET', {
+        startDate: params.startDate,
+        endDate: params.endDate
+      })
 
-    if (!response.success) {
-      // TODO: Error handling
-      return
-    }
+      if (!response.success) {
+        // TODO: Error handling
+        return
+      }
 
-    dispatch({
-      type: 'events/add',
-      payload: response.events
-    })
+      dispatch({
+        type: 'events/add',
+        payload: response.events
+      })
+    } catch {}
   }, [params.startDate, params.endDate, dispatch])
 
   useEffect(() => {

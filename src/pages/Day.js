@@ -23,20 +23,22 @@ export default function Day({ onTimeSelected }) {
   )
 
   const fetchEvents = useCallback(async () => {
-    const response = await api('events', 'GET', {
-      startDate: params.date,
-      endDate: params.date
-    })
+    try {
+      const response = await api('events', 'GET', {
+        startDate: params.date,
+        endDate: params.date
+      })
 
-    if (!response.success) {
-      // TODO: Error handling
-      return
-    }
+      if (!response.success) {
+        // TODO: Error handling
+        return
+      }
 
-    dispatch({
-      type: 'events/add',
-      payload: response.events
-    })
+      dispatch({
+        type: 'events/add',
+        payload: response.events
+      })
+    } catch {}
   }, [params.date, dispatch])
 
   useEffect(() => {

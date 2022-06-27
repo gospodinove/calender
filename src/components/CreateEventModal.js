@@ -22,6 +22,8 @@ const CreateEventModal = ({ open, onClose }) => {
   const [start, setStart] = useState(null)
   const [end, setEnd] = useState(null)
 
+  const [errors, setErrors] = useState({})
+
   useEffect(() => {
     setStart(initialData ? new Date(initialData.start) : null)
     setEnd(initialData ? new Date(initialData?.end) : null)
@@ -37,7 +39,14 @@ const CreateEventModal = ({ open, onClose }) => {
       })
 
       if (!response.success) {
-        throw Error('Something went wrong')
+        switch (response.messageType) {
+          case 'validation-error':
+            setErrors(response.messages)
+            return
+
+          default:
+            return
+        }
       }
 
       dispatch({ type: 'events/add', payload: response.event })
@@ -46,7 +55,12 @@ const CreateEventModal = ({ open, onClose }) => {
     } catch (err) {
       console.log(err)
     }
-  }, [title, description, start, end, dispatch, onClose])
+  }, [title, description, start, end, dispatch, onClose, setErrors])
+
+  const onCancelClick = useCallback(() => {
+    setErrors({})
+    onClose()
+  }, [setErrors, onClose])
 
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
@@ -65,8 +79,8 @@ const CreateEventModal = ({ open, onClose }) => {
             type="text"
             fullWidth
             onChange={event => setTitle(event.target.value)}
-            // error={loginData.errors.email !== undefined}
-            // helperText={loginData.errors.email}
+            error={errors.title !== undefined}
+            helperText={errors.title}
             required
           />
 
@@ -80,15 +94,20 @@ const CreateEventModal = ({ open, onClose }) => {
             type="text"
             fullWidth
             onChange={event => setDescription(event.target.value)}
-            // error={loginData.errors.email !== undefined}
-            // helperText={loginData.errors.email}
+            error={errors.description !== undefined}
+            helperText={errors.description}
           />
 
           <Grid container spacing={1} sx={{ marginTop: '10px' }}>
             <Grid item xs>
               <DateTimePicker
                 renderInput={props => (
-                  <TextField {...props} sx={{ width: '100%' }} />
+                  <TextField
+                    {...props}
+                    sx={{ width: '100%' }}
+                    error={errors.start !== undefined}
+                    helperText={errors.start}
+                  />
                 )}
                 label="Start"
                 value={start}
@@ -98,7 +117,12 @@ const CreateEventModal = ({ open, onClose }) => {
             <Grid item xs>
               <DateTimePicker
                 renderInput={props => (
-                  <TextField {...props} sx={{ width: '100%' }} />
+                  <TextField
+                    {...props}
+                    sx={{ width: '100%' }}
+                    error={errors.end !== undefined}
+                    helperText={errors.end}
+                  />
                 )}
                 label="End"
                 value={end}
@@ -109,7 +133,7 @@ const CreateEventModal = ({ open, onClose }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onCancelClick}>Cancel</Button>
           <Button type="submit">Submit</Button>
         </DialogActions>
       </form>

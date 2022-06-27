@@ -2,7 +2,7 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const { validate } = require('indicative/validator')
 const { extend } = require('indicative/validator')
-const { replaceId } = require('../utils')
+const { replaceId, sendErrorResponse } = require('../utils')
 const {
   passwordValidator,
   validationMessages: messages
@@ -23,37 +23,43 @@ router.post('/login', async (req, res) => {
 
     await validate(req.body, schema, messages)
 
-    const user = await db.collection('users').findOne({ email: req.body.email })
+    try {
+      const user = await db
+        .collection('users')
+        .findOne({ email: req.body.email })
 
-    if (!user) {
-      res.json({
-        success: false,
-        errors: [{ message: 'Email is not registered', field: 'email' }]
-      })
-      return
+      if (!user) {
+        res.json({
+          success: false,
+          errors: [{ message: 'Email is not registered', field: 'email' }]
+        })
+        return
+      }
+
+      const isPasswordValid = await bcrypt.compare(
+        req.body.password,
+        user.password
+      )
+
+      if (!isPasswordValid) {
+        res.json({
+          success: false,
+          errors: [{ message: 'Wrong password', field: 'password' }]
+        })
+        return
+      }
+
+      replaceId(user)
+
+      delete user.password
+
+      req.session.user = user
+      res.json({ success: true, user })
+    } catch (err) {
+      sendErrorResponse(res, 500, 'general', 'Could not login')
     }
-
-    const isPasswordValid = await bcrypt.compare(
-      req.body.password,
-      user.password
-    )
-
-    if (!isPasswordValid) {
-      res.json({
-        success: false,
-        errors: [{ message: 'Wrong password', field: 'password' }]
-      })
-      return
-    }
-
-    replaceId(user)
-
-    delete user.password
-
-    req.session.user = user
-    res.json({ success: true, user })
   } catch (errors) {
-    res.json({ success: false, errors })
+    sendErrorResponse(res, 500, 'validation-error', errors)
   }
 })
 
@@ -70,34 +76,38 @@ router.post('/register', async (req, res) => {
 
     await validate(req.body, schema, messages)
 
-    const registeredUser = await db
-      .collection('users')
-      .findOne({ email: req.body.email })
+    try {
+      const registeredUser = await db
+        .collection('users')
+        .findOne({ email: req.body.email })
 
-    if (registeredUser) {
-      res.json({
-        success: false,
-        errors: [{ field: 'email', message: 'Email is taken' }]
-      })
-      return
+      if (registeredUser) {
+        res.json({
+          success: false,
+          errors: [{ field: 'email', message: 'Email is taken' }]
+        })
+        return
+      }
+
+      const salt = await bcrypt.genSalt(10)
+      const password = await bcrypt.hash(req.body.password, salt)
+
+      const user = { ...req.body, password }
+
+      await db.collection('users').insertOne(user)
+
+      replaceId(user)
+
+      delete user.password
+
+      req.session.user = user
+
+      res.json({ success: true, user })
+    } catch {
+      sendErrorResponse(res, 500, 'general', 'Could not register user')
     }
-
-    const salt = await bcrypt.genSalt(10)
-    const password = await bcrypt.hash(req.body.password, salt)
-
-    const user = { ...req.body, password }
-
-    await db.collection('users').insertOne(user)
-
-    replaceId(user)
-
-    delete user.password
-
-    req.session.user = user
-
-    res.json({ success: true, user })
   } catch (errors) {
-    res.json({ success: false, errors })
+    sendErrorResponse(res, 500, 'validation-error', errors)
   }
 })
 

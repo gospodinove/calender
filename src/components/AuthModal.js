@@ -26,16 +26,6 @@ const registerDataInitialState = {
   errors: {}
 }
 
-const parseErrorMessages = errors => {
-  const result = {}
-
-  for (const err of errors) {
-    errors[err.field] = err.message
-  }
-
-  return result
-}
-
 const AuthModal = ({ open, onClose }) => {
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -49,15 +39,22 @@ const AuthModal = ({ open, onClose }) => {
 
     const response = await api('login', 'POST', loginData)
 
-    if (response.success) {
-      dispatch({ type: 'auth/setUser', payload: response.user })
-    } else {
-      setLoginData({
-        ...loginData,
-        errors: parseErrorMessages(response.errors)
-      })
-      throw new Error('Could not log in')
+    if (!response.success) {
+      switch (response.messageType) {
+        case 'validation-error':
+          setLoginData({
+            ...loginData,
+            errors: response.messages
+          })
+          break
+
+        default:
+          break
+      }
+      throw new Error()
     }
+
+    dispatch({ type: 'auth/setUser', payload: response.user })
   }, [dispatch, loginData])
 
   const submitRegister = useCallback(async () => {
@@ -65,15 +62,22 @@ const AuthModal = ({ open, onClose }) => {
 
     const response = await api('register', 'POST', registerData)
 
-    if (response.success) {
-      dispatch({ type: 'auth/setUser', payload: response.user })
-    } else {
-      setRegisterData({
-        ...registerData,
-        errors: parseErrorMessages(response.errors)
-      })
-      throw new Error('Could not register')
+    if (!response.success) {
+      switch (response.messageType) {
+        case 'validation-error':
+          setRegisterData({
+            ...registerData,
+            errors: response.messages
+          })
+          break
+
+        default:
+          break
+      }
+      throw new Error()
     }
+
+    dispatch({ type: 'auth/setUser', payload: response.user })
   }, [dispatch, registerData])
 
   const submit = useCallback(async () => {
@@ -102,6 +106,11 @@ const AuthModal = ({ open, onClose }) => {
     setLoginData(loginDataInitialState)
     setRegisterData(registerDataInitialState)
   }, [])
+
+  const onCancelClick = useCallback(() => {
+    clearTabData()
+    onClose()
+  }, [clearTabData, onClose])
 
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
@@ -226,7 +235,7 @@ const AuthModal = ({ open, onClose }) => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onCancelClick}>Cancel</Button>
           <Button type="submit">Submit</Button>
         </DialogActions>
       </form>

@@ -3,7 +3,9 @@ const { getValue, skippable } = require('indicative-utils')
 module.exports.validationMessages = {
   required: 'This field is required',
   email: 'Enter valid email address',
-  password: 'Min 8 characters (capital & lowercase letter, special character)'
+  password: 'Min 8 characters (capital & lowercase letter, special character)',
+  before: 'This date is too late',
+  after: 'This date is too early'
 }
 
 module.exports.passwordValidator = {
