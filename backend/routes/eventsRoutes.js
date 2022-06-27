@@ -15,14 +15,17 @@ router.post('', isAuthenticated, async (req, res) => {
     const schema = {
       title: 'required|string',
       description: 'string|max:250',
-      start: `required|date|before:${new Date(event.end)}`,
-      end: `required|date|after:${new Date(event.start)}`
+      // TODO: before/after validation
+      start: `required|date`,
+      end: `required|date`
     }
 
     await validate(event, schema, validationMessages)
 
     try {
-      await db.collection('events').insertOne(event)
+      await db
+        .collection('events')
+        .insertOne({ ...event, userId: req.session.user.id })
 
       res.json({ success: true, event: replaceId(event) })
     } catch (err) {
@@ -48,7 +51,7 @@ router.get('', isAuthenticated, async (req, res) => {
   try {
     const events = await db
       .collection('events')
-      .find({ start: { $gte: start, $lte: end } })
+      .find({ userId: req.session.user.id, start: { $gte: start, $lte: end } })
       .toArray()
 
     res.json({ success: true, events: events.map(e => replaceId(e)) })
