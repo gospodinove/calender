@@ -2,7 +2,7 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const { validate } = require('indicative/validator')
 const { extend } = require('indicative/validator')
-const { replace_id } = require('../utils')
+const { replaceId } = require('../utils')
 const {
   passwordValidator,
   validationMessages: messages
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
       return
     }
 
-    replace_id(user)
+    replaceId(user)
 
     delete user.password
 
@@ -89,7 +89,7 @@ router.post('/register', async (req, res) => {
 
     await db.collection('users').insertOne(user)
 
-    replace_id(user)
+    replaceId(user)
 
     delete user.password
 

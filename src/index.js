@@ -11,15 +11,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </LocalizationProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+  <BrowserRouter>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </LocalizationProvider>
+  </BrowserRouter>
 )
 
 // If you want to start measuring performance in your app, pass a function

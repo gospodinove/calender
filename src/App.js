@@ -13,6 +13,7 @@ import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
 import { cleanEventData } from './utils/events'
 import { formatDate } from './utils/formatters'
+import { getWeekBoundsForDate } from './utils/date'
 
 function App() {
   const dispatch = useDispatch()
@@ -47,7 +48,7 @@ function App() {
           element={<Day onTimeSelected={onTimeSelected} />}
         />
         <Route
-          path="week/:date"
+          path="week/:startDate/:endDate"
           element={<Week onTimeSelected={onTimeSelected} />}
         />
         <Route path="list" element={<List />} />
@@ -71,7 +72,13 @@ function App() {
         />
         <Route
           path="week"
-          element={<Navigate to={`/week/${formatDate(new Date())}`} />}
+          element={
+            <Navigate
+              to={`/week/${getWeekBoundsForDate(new Date())
+                .map(d => formatDate(d))
+                .join('/')}`}
+            />
+          }
         />
       </Route>
     </Routes>

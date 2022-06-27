@@ -1,13 +1,20 @@
 import { baseUrl } from '../constants'
 
-export const api = async (url, method = 'GET', data) =>
-  (
-    await fetch(baseUrl + '/api/' + url, {
+export const api = async (endPoint, method = 'GET', data) => {
+  const url = new URL(baseUrl + '/api/' + endPoint)
+
+  if (method === 'GET' && data !== undefined) {
+    Object.keys(data).forEach(key => url.searchParams.append(key, data[key]))
+  }
+
+  return (
+    await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data),
+      body: method !== 'GET' ? JSON.stringify(data) : undefined,
       credentials: 'include'
     })
   ).json()
+}

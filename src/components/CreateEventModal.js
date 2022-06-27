@@ -11,16 +11,6 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import Grid from '@mui/material/Grid'
 import { api } from '../utils/api'
 
-const parseErrorMessages = errors => {
-  const result = {}
-
-  for (const err of errors) {
-    errors[err.field] = err.message
-  }
-
-  return result
-}
-
 const CreateEventModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
 
