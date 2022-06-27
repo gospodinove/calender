@@ -40,8 +40,18 @@ const CreateEventModal = ({ open, onClose }) => {
 
       if (!response.success) {
         switch (response.messageType) {
-          case 'validation-error':
+          case 'field-error':
             setErrors(response.messages)
+            return
+
+          case 'general':
+            dispatch({
+              type: 'modals/show',
+              payload: {
+                modal: 'toast',
+                data: { type: 'error', message: response.messages }
+              }
+            })
             return
 
           default:

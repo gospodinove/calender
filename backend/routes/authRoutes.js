@@ -3,10 +3,7 @@ const bcrypt = require('bcrypt')
 const { validate } = require('indicative/validator')
 const { extend } = require('indicative/validator')
 const { replaceId, sendErrorResponse } = require('../utils')
-const {
-  passwordValidator,
-  validationMessages: messages
-} = require('../validation')
+const { passwordValidator, validationMessages } = require('../validation')
 
 const router = express.Router()
 
@@ -21,7 +18,7 @@ router.post('/login', async (req, res) => {
       password: 'required'
     }
 
-    await validate(req.body, schema, messages)
+    await validate(req.body, schema, validationMessages)
 
     try {
       const user = await db
@@ -29,10 +26,9 @@ router.post('/login', async (req, res) => {
         .findOne({ email: req.body.email })
 
       if (!user) {
-        res.json({
-          success: false,
-          errors: [{ message: 'Email is not registered', field: 'email' }]
-        })
+        sendErrorResponse(res, 500, 'field-error', [
+          { message: 'Email is not registered', field: 'email' }
+        ])
         return
       }
 
@@ -42,10 +38,9 @@ router.post('/login', async (req, res) => {
       )
 
       if (!isPasswordValid) {
-        res.json({
-          success: false,
-          errors: [{ message: 'Wrong password', field: 'password' }]
-        })
+        sendErrorResponse(res, 500, 'field-error', [
+          { field: 'password', message: 'Wrong password' }
+        ])
         return
       }
 
@@ -59,7 +54,7 @@ router.post('/login', async (req, res) => {
       sendErrorResponse(res, 500, 'general', 'Could not login')
     }
   } catch (errors) {
-    sendErrorResponse(res, 500, 'validation-error', errors)
+    sendErrorResponse(res, 500, 'field-error', errors)
   }
 })
 
@@ -74,7 +69,7 @@ router.post('/register', async (req, res) => {
       password: 'required|password'
     }
 
-    await validate(req.body, schema, messages)
+    await validate(req.body, schema, validationMessages)
 
     try {
       const registeredUser = await db
@@ -107,7 +102,7 @@ router.post('/register', async (req, res) => {
       sendErrorResponse(res, 500, 'general', 'Could not register user')
     }
   } catch (errors) {
-    sendErrorResponse(res, 500, 'validation-error', errors)
+    sendErrorResponse(res, 500, 'field-error', errors)
   }
 })
 
@@ -129,10 +124,10 @@ router.get('/logout', (req, res) => {
         res.json({ success: true })
       })
     } else {
-      throw new Error('Something went wrong')
+      sendErrorResponse(res, 500, 'general', 'Could not logout')
     }
-  } catch (err) {
-    res.json({ success: false, error: 'Something went wrong' })
+  } catch {
+    sendErrorResponse(res, 500, 'general', 'Could not logout')
   }
 })
 

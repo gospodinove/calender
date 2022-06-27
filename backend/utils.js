@@ -15,7 +15,7 @@ module.exports.sendErrorResponse = function (
     code: status,
     messageType: messageType,
     messages:
-      messageType === 'validation-error'
+      messageType === 'field-error'
         ? parseValidationErrorMessages(messages)
         : messages
   })

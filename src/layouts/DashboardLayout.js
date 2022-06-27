@@ -19,7 +19,15 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { drawerWidth } from '../utils/layout'
 import AuthModal from '../components/AuthModal'
 import { useDispatch, useSelector } from 'react-redux'
-import { AppBar, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
+import {
+  Alert,
+  AppBar,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Toolbar,
+  Typography
+} from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
@@ -101,6 +109,16 @@ const DashboardLayout = () => {
       dispatch({
         type: `modals/${open ? 'show' : 'hide'}`,
         payload: { modal: 'createEvent', data }
+      }),
+    [dispatch]
+  )
+
+  const toastData = useSelector(state => state.modals.toast)
+  const hideToast = useCallback(
+    () =>
+      dispatch({
+        type: 'modals/hide',
+        payload: { modal: 'toast' }
       }),
     [dispatch]
   )
@@ -271,6 +289,21 @@ const DashboardLayout = () => {
         open={isCreateEventModalOpen}
         onClose={() => setIsCreateEventModalOpen(false)}
       />
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={toastData?.open ?? false}
+        autoHideDuration={6000}
+        onClose={hideToast}
+      >
+        <Alert
+          onClose={hideToast}
+          severity={toastData?.data.type}
+          sx={{ width: '100%' }}
+        >
+          {toastData?.data.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

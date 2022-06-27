@@ -29,7 +29,7 @@ router.post('', isAuthenticated, async (req, res) => {
       sendErrorResponse(res, 500, 'general', 'Could not create event')
     }
   } catch (errors) {
-    sendErrorResponse(res, 500, 'validation-error', errors)
+    sendErrorResponse(res, 500, 'field-error', errors)
   }
 })
 
@@ -53,7 +53,7 @@ router.get('', isAuthenticated, async (req, res) => {
 
     res.json({ success: true, events: events.map(e => replaceId(e)) })
   } catch (errors) {
-    sendErrorResponse(res, 500, { main: 'Something went wrong' }, errors)
+    sendErrorResponse(res, 500, 'general', 'Something went wrong')
   }
 })
 

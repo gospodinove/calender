@@ -41,10 +41,20 @@ const AuthModal = ({ open, onClose }) => {
 
     if (!response.success) {
       switch (response.messageType) {
-        case 'validation-error':
+        case 'field-error':
           setLoginData({
             ...loginData,
             errors: response.messages
+          })
+          break
+
+        case 'general':
+          dispatch({
+            type: 'modals/show',
+            payload: {
+              modal: 'toast',
+              data: { type: 'error', message: response.messages }
+            }
           })
           break
 
@@ -64,10 +74,20 @@ const AuthModal = ({ open, onClose }) => {
 
     if (!response.success) {
       switch (response.messageType) {
-        case 'validation-error':
+        case 'field-error':
           setRegisterData({
             ...registerData,
             errors: response.messages
+          })
+          break
+
+        case 'general':
+          dispatch({
+            type: 'modals/show',
+            payload: {
+              modal: 'toast',
+              data: { type: 'error', message: response.messages }
+            }
           })
           break
 
