@@ -1,11 +1,12 @@
 const express = require('express')
 const { validate } = require('indicative/validator')
-const { replaceId, groupEventsByDate } = require('../utils')
+const isAuthenticated = require('../middleware/isAuthenticated')
+const { replaceId } = require('../utils')
 const { validationMessages } = require('../validation')
 
 const router = express.Router()
 
-router.post('', async (req, res) => {
+router.post('', isAuthenticated, async (req, res) => {
   const db = req.app.locals.db
 
   const event = req.body
@@ -28,7 +29,7 @@ router.post('', async (req, res) => {
   }
 })
 
-router.get('', async (req, res) => {
+router.get('', isAuthenticated, async (req, res) => {
   const db = req.app.locals.db
 
   const startDate = req.query.startDate

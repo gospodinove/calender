@@ -18,17 +18,21 @@ import { getWeekBoundsForDate } from './utils/date'
 function App() {
   const dispatch = useDispatch()
 
-  useEffect(() => {
-    async function checkLoggedIn() {
+  const checkLoggedIn = useCallback(async () => {
+    try {
       const user = await api('session-user')
 
       if (user && !isEmptyObject(user)) {
         dispatch({ type: 'auth/setUser', payload: user })
       }
+    } catch (err) {
+      console.log(err)
     }
-
-    checkLoggedIn()
   }, [dispatch])
+
+  useEffect(() => {
+    checkLoggedIn()
+  }, [checkLoggedIn])
 
   const onTimeSelected = useCallback(
     eventData => {
