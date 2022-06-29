@@ -1,7 +1,6 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import PropTypes from 'prop-types'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useRef } from 'react'
@@ -9,12 +8,15 @@ import { api } from '../utils/api'
 import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
+import { cleanEventData } from '../utils/events'
 
-export default function Day({ onTimeSelected }) {
+export default function Day() {
   const params = useParams()
   const dispatch = useDispatch()
 
   const calendarRef = useRef(null)
+
+  const isAuthenticated = useSelector(store => store.auth.user !== undefined)
 
   const events = useSelector(store =>
     store.events.filter(event =>
@@ -56,6 +58,24 @@ export default function Day({ onTimeSelected }) {
     fetchEvents()
   }, [fetchEvents, params.date])
 
+  const onTimeSelected = useCallback(
+    eventData => {
+      if (!isAuthenticated) {
+        dispatch({
+          type: 'modals/show',
+          payload: { modal: 'auth' }
+        })
+        return
+      }
+
+      dispatch({
+        type: 'modals/show',
+        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
+      })
+    },
+    [dispatch]
+  )
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -81,8 +101,4 @@ export default function Day({ onTimeSelected }) {
       </Grid>
     </Grid>
   )
-}
-
-Day.propTypes = {
-  onTimeSelected: PropTypes.func
 }

@@ -7,12 +7,14 @@ import { formatDate, formatReadableDate } from '../utils/formatters'
 import { useNavigate } from 'react-router-dom'
 import { addDaysToDate } from '../utils/dates'
 import ShareIcon from '@mui/icons-material/Share'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { api } from '../utils/api'
 
 const CalendarNavigationBar = ({ data }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+
+  const isAuthenticated = useSelector(state => state.auth.user !== undefined)
 
   const [title, setTitle] = useState()
 
@@ -34,6 +36,14 @@ const CalendarNavigationBar = ({ data }) => {
   }, [data])
 
   const onSharePress = useCallback(async () => {
+    if (!isAuthenticated) {
+      dispatch({
+        type: 'modals/show',
+        payload: { modal: 'auth' }
+      })
+      return
+    }
+
     const response = await api('shared', 'POST', data)
 
     if (!response.success) {

@@ -1,7 +1,6 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import PropTypes from 'prop-types'
 import { useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useCallback, useEffect, useRef } from 'react'
@@ -9,9 +8,13 @@ import { api } from '../utils/api'
 import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
-export default function Week({ onTimeSelected }) {
+import { cleanEventData } from '../utils/events'
+
+export default function Week() {
   const params = useParams()
   const dispatch = useDispatch()
+
+  const isAuthenticated = useSelector(store => store.auth.user !== undefined)
 
   const calendarRef = useRef(null)
 
@@ -55,6 +58,24 @@ export default function Week({ onTimeSelected }) {
     fetchEvents()
   }, [fetchEvents, params.startDate])
 
+  const onTimeSelected = useCallback(
+    eventData => {
+      if (!isAuthenticated) {
+        dispatch({
+          type: 'modals/show',
+          payload: { modal: 'auth' }
+        })
+        return
+      }
+
+      dispatch({
+        type: 'modals/show',
+        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
+      })
+    },
+    [dispatch]
+  )
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -86,8 +107,4 @@ export default function Week({ onTimeSelected }) {
       </Grid>
     </Grid>
   )
-}
-
-Week.propTypes = {
-  onTimeSelected: PropTypes.func
 }

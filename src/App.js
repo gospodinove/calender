@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux'
 import { useCallback, useEffect } from 'react'
 import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
-import { cleanEventData } from './utils/events'
 import { formatDate } from './utils/formatters'
 import { getWeekBoundsForDate } from './utils/dates'
 
@@ -34,27 +33,11 @@ function App() {
     checkLoggedIn()
   }, [checkLoggedIn])
 
-  const onTimeSelected = useCallback(
-    eventData => {
-      dispatch({
-        type: 'modals/show',
-        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
-      })
-    },
-    [dispatch]
-  )
-
   return (
     <Routes>
       <Route path="/" element={<DashboardLayout />}>
-        <Route
-          path="day/:date"
-          element={<Day onTimeSelected={onTimeSelected} />}
-        />
-        <Route
-          path="week/:startDate/:endDate"
-          element={<Week onTimeSelected={onTimeSelected} />}
-        />
+        <Route path="day/:date" element={<Day />} />
+        <Route path="week/:startDate/:endDate" element={<Week />} />
         <Route path="list" element={<List />} />
 
         {/* Auth */}

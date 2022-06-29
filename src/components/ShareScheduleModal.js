@@ -10,8 +10,6 @@ import { DialogContentText } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { baseUrl } from '../constants'
 
-// TODO: don't open unless logged in (same applies to create event modal)
-
 const ShareScheduleModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
   const data = useSelector(state => state.modals.shareSchedule?.data)
