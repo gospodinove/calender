@@ -80,6 +80,7 @@ const Drawer = styled(MuiDrawer, {
   })
 }))
 
+// TODO: Make responsive
 const DashboardLayout = () => {
   const dispatch = useDispatch()
 

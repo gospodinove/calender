@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { api } from '../utils/api'
 import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
+import { Grid } from '@mui/material'
 export default function Week({ onTimeSelected }) {
   const params = useParams()
   const dispatch = useDispatch()
@@ -49,28 +50,35 @@ export default function Week({ onTimeSelected }) {
   }, [fetchEvents, params.startDate])
 
   return (
-    <>
-      <CalendarNavigationBar
-        data={{
-          type: 'week',
-          startDate: params.startDate,
-          endDate: params.endDate
-        }}
-      />
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
-        allDaySlot={false}
-        height="auto"
-        nowIndicator
-        events={events}
-        firstDay={1}
-        selectable
-        select={onTimeSelected}
-        headerToolbar={false}
-      />
-    </>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <CalendarNavigationBar
+          data={{
+            type: 'week',
+            startDate: params.startDate,
+            endDate: params.endDate
+          }}
+        />
+      </Grid>
+      <Grid item xs={9}>
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          allDaySlot={false}
+          height="auto"
+          nowIndicator
+          events={events}
+          firstDay={1}
+          selectable
+          select={onTimeSelected}
+          headerToolbar={false}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        Selected event
+      </Grid>
+    </Grid>
   )
 }
 

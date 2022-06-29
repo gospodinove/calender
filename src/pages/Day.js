@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { api } from '../utils/api'
 import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
+import { Grid } from '@mui/material'
 
 export default function Day({ onTimeSelected }) {
   const params = useParams()
@@ -50,22 +51,29 @@ export default function Day({ onTimeSelected }) {
   }, [fetchEvents, params.date])
 
   return (
-    <>
-      <CalendarNavigationBar data={{ type: 'day', date: params.date }} />
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[timeGridPlugin, interactionPlugin]}
-        initialView="timeGridDay"
-        allDaySlot={false}
-        height="auto"
-        nowIndicator
-        selectable
-        select={onTimeSelected}
-        events={events}
-        headerToolbar={false}
-        dayHeaders={false}
-      />
-    </>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <CalendarNavigationBar data={{ type: 'day', date: params.date }} />
+      </Grid>
+      <Grid item xs={9}>
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[timeGridPlugin, interactionPlugin]}
+          initialView="timeGridDay"
+          allDaySlot={false}
+          height="auto"
+          nowIndicator
+          selectable
+          select={onTimeSelected}
+          events={events}
+          headerToolbar={false}
+          dayHeaders={false}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        Selected event
+      </Grid>
+    </Grid>
   )
 }
 
