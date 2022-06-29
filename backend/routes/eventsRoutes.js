@@ -1,7 +1,12 @@
 const express = require('express')
 const { validate } = require('indicative/validator')
 const isAuthenticated = require('../middleware/isAuthenticated')
-const { replaceId, sendErrorResponse } = require('../utils')
+const {
+  replaceId,
+  sendErrorResponse,
+  isMultidayEvent,
+  splitMultidayEvent
+} = require('../utils')
 const { validationMessages } = require('../validation')
 
 const router = express.Router()
@@ -23,11 +28,22 @@ router.post('', isAuthenticated, async (req, res) => {
     await validate(event, schema, validationMessages)
 
     try {
-      await db
-        .collection('events')
-        .insertOne({ ...event, userId: req.session.user.id })
+      if (isMultidayEvent(event)) {
+        const eventSplits = splitMultidayEvent(event).map(e => ({
+          ...e,
+          userId: req.session.user.id
+        }))
 
-      res.json({ success: true, event: replaceId(event) })
+        await db.collection('events').insertMany(eventSplits)
+
+        res.json({ success: true, events: eventSplits.map(e => replaceId(e)) })
+      } else {
+        await db
+          .collection('events')
+          .insertOne({ ...event, userId: req.session.user.id })
+
+        res.json({ success: true, event: replaceId(event) })
+      }
     } catch (err) {
       sendErrorResponse(res, 500, 'general', 'Could not create event')
     }

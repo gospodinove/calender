@@ -59,7 +59,10 @@ const CreateEventModal = ({ open, onClose }) => {
         }
       }
 
-      dispatch({ type: 'events/add', payload: response.event })
+      // in case of a multiday event an array of events is created and returned
+      const payload = response.events ? response.events : response.event
+
+      dispatch({ type: 'events/add', payload })
 
       onClose()
     } catch (err) {
