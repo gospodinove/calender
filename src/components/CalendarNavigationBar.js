@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { addDaysToDate } from '../utils/dates'
 import ShareIcon from '@mui/icons-material/Share'
 import { useDispatch } from 'react-redux'
+import { api } from '../utils/api'
 
 const CalendarNavigationBar = ({ data }) => {
   const navigate = useNavigate()
@@ -32,10 +33,26 @@ const CalendarNavigationBar = ({ data }) => {
     }
   }, [data])
 
-  const onSharePress = useCallback(() => {
+  const onSharePress = useCallback(async () => {
+    const response = await api('shared', 'POST', data)
+
+    if (!response.success) {
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'toast',
+          data: { type: 'error', message: response.messages }
+        }
+      })
+      return
+    }
+
     dispatch({
       type: 'modals/show',
-      payload: { modal: 'shareSchedule', data }
+      payload: {
+        modal: 'shareSchedule',
+        data: { ...data, configId: response.configId }
+      }
     })
   }, [dispatch, data])
 
