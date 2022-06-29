@@ -1,15 +1,11 @@
-import React, { useCallback, useMemo, useState } from 'react'
-import { styled, useTheme } from '@mui/material/styles'
+import React, { useCallback, useState } from 'react'
 import Box from '@mui/material/Box'
-import MuiDrawer from '@mui/material/Drawer'
+import Drawer from '@mui/material/Drawer'
 import List from '@mui/material/List'
 import CssBaseline from '@mui/material/CssBaseline'
-import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ViewDayIcon from '@mui/icons-material/ViewDay'
 import ViewWeekIcon from '@mui/icons-material/ViewWeek'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
@@ -33,60 +29,11 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
 import CreateEventModal from '../components/CreateEventModal'
 
-const openedMixin = theme => ({
-  width: drawerWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen
-  }),
-  overflowX: 'hidden'
-})
-
-const closedMixin = theme => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen
-  }),
-  overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`
-  }
-})
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar
-}))
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: prop => prop !== 'open'
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
-  ...(open && {
-    ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme)
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme)
-  })
-}))
-
-// TODO: Make responsive
 const DashboardLayout = () => {
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
-  const theme = useTheme()
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   const [userMenuAnchorElement, setUserMenuAnchorElement] = useState(null)
 
@@ -139,7 +86,7 @@ const DashboardLayout = () => {
     setUserMenuAnchorElement(null)
   }, [setUserMenuAnchorElement])
 
-  const generateMenuItems = useCallback(() => {
+  const generateDrawerContent = useCallback(() => {
     const items = [
       { title: 'Day', icon: <ViewDayIcon />, route: 'day' },
       { title: 'Week', icon: <ViewWeekIcon />, route: 'week' },
@@ -147,32 +94,34 @@ const DashboardLayout = () => {
       { title: 'Teams', icon: <TeamIcon />, route: 'teams' }
     ]
 
-    return items.map(item => (
-      <ListItemButton
-        key={item.route}
-        sx={{
-          minHeight: 48,
-          justifyContent: isDrawerOpen ? 'initial' : 'center',
-          px: 2.5
-        }}
-        onClick={() => navigate('/' + item.route)}
-      >
-        <ListItemIcon
-          sx={{
-            minWidth: 0,
-            mr: isDrawerOpen ? 3 : 'auto',
-            justifyContent: 'center'
-          }}
-        >
-          {item.icon}
-        </ListItemIcon>
-        <ListItemText
-          primary={item.title}
-          sx={{ opacity: isDrawerOpen ? 1 : 0 }}
-        />
-      </ListItemButton>
-    ))
-  }, [isDrawerOpen, navigate])
+    return (
+      <List>
+        <Toolbar />
+        {items.map(item => (
+          <ListItemButton
+            key={item.route}
+            sx={{
+              minHeight: 48,
+              justifyContent: 'initial',
+              px: 2.5
+            }}
+            onClick={() => navigate('/' + item.route)}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: 3,
+                justifyContent: 'center'
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.title} sx={{ opacity: 1 }} />
+          </ListItemButton>
+        ))}
+      </List>
+    )
+  }, [navigate])
 
   const onUserMenuClick = useCallback(
     event => {
@@ -200,21 +149,26 @@ const DashboardLayout = () => {
     dispatch({ type: 'auth/setUser', payload: undefined })
   }, [dispatch, onUserMenuClose])
 
+  const container = window !== undefined ? window.document.body : undefined
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
-      <AppBar position="fixed" open={isDrawerOpen}>
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` }
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             onClick={onDrawerToggle}
             edge="start"
-            sx={{
-              marginRight: 5,
-              ...(isDrawerOpen && { display: 'none' })
-            }}
+            sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
@@ -255,29 +209,53 @@ const DashboardLayout = () => {
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={isDrawerOpen}>
-        <DrawerHeader>
-          <IconButton onClick={onDrawerToggle}>
-            {theme.direction === 'rtl' ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </DrawerHeader>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="navigation"
+      >
+        <Drawer
+          container={container}
+          variant="temporary"
+          open={isDrawerOpen}
+          onClose={onDrawerToggle}
+          ModalProps={{
+            keepMounted: true
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth
+            }
+          }}
+        >
+          {generateDrawerContent()}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth
+            }
+          }}
+          open
+        >
+          {generateDrawerContent()}
+        </Drawer>
+      </Box>
 
-        <Divider />
-
-        <List>
-          {useMemo(
-            () => generateMenuItems(isDrawerOpen),
-            [isDrawerOpen, generateMenuItems]
-          )}
-        </List>
-      </Drawer>
-
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <DrawerHeader />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` }
+        }}
+      >
+        <Toolbar />
         <Outlet />
       </Box>
 
