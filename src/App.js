@@ -13,7 +13,7 @@ import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
 import { cleanEventData } from './utils/events'
 import { formatDate } from './utils/formatters'
-import { getWeekBoundsForDate } from './utils/date'
+import { getWeekBoundsForDate } from './utils/dates'
 
 function App() {
   const dispatch = useDispatch()
