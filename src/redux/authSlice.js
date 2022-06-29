@@ -10,6 +10,9 @@ export const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload
+    },
+    updatePrefs: (state, action) => {
+      state.user = { ...state.user, preferences: action.payload }
     }
   }
 })

@@ -7,6 +7,7 @@ const MongoStore = require('connect-mongo')
 const authRoutes = require('./routes/authRoutes')
 const eventsRoutes = require('./routes/eventsRoutes')
 const sharedConfigRoutes = require('./routes/sharedConfigRoutes')
+const usersRoutes = require('./routes/usersRoutes')
 const logger = require('morgan')
 
 dotenv.config()
@@ -51,6 +52,7 @@ MongoClient.connect(
     apiRouter.use('/', authRoutes)
     apiRouter.use('/events', eventsRoutes)
     apiRouter.use('/shared', sharedConfigRoutes)
+    apiRouter.use('/users', usersRoutes)
 
     app.listen(8080, () =>
       console.log('API is running on http://localhost:8080')

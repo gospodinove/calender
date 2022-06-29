@@ -29,6 +29,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
 import CreateEventModal from '../components/CreateEventModal'
 import ShareScheduleModal from '../components/ShareScheduleModal'
+import UserPreferencesModal from '../components/UserPreferencesModal'
 
 const DashboardLayout = () => {
   const dispatch = useDispatch()
@@ -70,6 +71,18 @@ const DashboardLayout = () => {
       dispatch({
         type: `modals/${open ? 'show' : 'hide'}`,
         payload: { modal: 'shareSchedule' }
+      }),
+    [dispatch]
+  )
+
+  const isUserPreferencesModalOpen = useSelector(
+    state => state.modals.userPreferences?.open ?? false
+  )
+  const setIsUserPreferencesModalOpen = useCallback(
+    open =>
+      dispatch({
+        type: `modals/${open ? 'show' : 'hide'}`,
+        payload: { modal: 'userPreferences' }
       }),
     [dispatch]
   )
@@ -167,6 +180,11 @@ const DashboardLayout = () => {
     dispatch({ type: 'auth/setUser', payload: undefined })
   }, [dispatch, onUserMenuClose])
 
+  const onPreferencesClick = useCallback(() => {
+    onUserMenuClose()
+    setIsUserPreferencesModalOpen(true)
+  }, [onUserMenuClose, setIsUserPreferencesModalOpen])
+
   const container = window !== undefined ? window.document.body : undefined
 
   return (
@@ -220,7 +238,7 @@ const DashboardLayout = () => {
             open={userMenuAnchorElement !== null}
             onClose={onUserMenuClose}
           >
-            <MenuItem onClick={onUserMenuClose}>Preferences</MenuItem>
+            <MenuItem onClick={onPreferencesClick}>Preferences</MenuItem>
             <MenuItem onClick={onLogout}>Log out</MenuItem>
           </Menu>
         </Toolbar>
@@ -289,6 +307,11 @@ const DashboardLayout = () => {
       <ShareScheduleModal
         open={isShareScheduleModalOpen}
         onClose={() => setIsShareScheduleModalOpen(false)}
+      />
+
+      <UserPreferencesModal
+        open={isUserPreferencesModalOpen}
+        onClose={() => setIsUserPreferencesModalOpen(false)}
       />
 
       <Snackbar

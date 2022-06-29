@@ -10,7 +10,7 @@ import { DialogContentText } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { baseUrl } from '../constants'
 
-// TODO: hide event details => user pref page
+// TODO: don't open unless logged in (same applies to create event modal)
 
 const ShareScheduleModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
