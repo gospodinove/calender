@@ -8,3 +8,11 @@ export const formatDate = date => {
 
   return [year, month, day].join('-')
 }
+
+export const formatReadableDate = (date, includeWeekday = false) =>
+  date.toLocaleDateString('en-BG', {
+    weekday: includeWeekday ? 'long' : undefined,
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })

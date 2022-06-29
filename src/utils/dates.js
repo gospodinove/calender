@@ -15,3 +15,6 @@ export const isDateInRange = (date, startRange, endRange) => {
 
   return startRange <= date && date <= endRange
 }
+
+export const addDaysToDate = (days, date) =>
+  new Date(date.setDate(date.getDate() + days))
