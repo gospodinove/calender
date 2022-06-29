@@ -28,6 +28,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
 import CreateEventModal from '../components/CreateEventModal'
+import ShareScheduleModal from '../components/ShareScheduleModal'
 
 const DashboardLayout = () => {
   const dispatch = useDispatch()
@@ -57,6 +58,18 @@ const DashboardLayout = () => {
       dispatch({
         type: `modals/${open ? 'show' : 'hide'}`,
         payload: { modal: 'createEvent', data }
+      }),
+    [dispatch]
+  )
+
+  const isShareScheduleModalOpen = useSelector(
+    state => state.modals.shareSchedule?.open ?? false
+  )
+  const setIsShareScheduleModalOpen = useCallback(
+    open =>
+      dispatch({
+        type: `modals/${open ? 'show' : 'hide'}`,
+        payload: { modal: 'shareSchedule' }
       }),
     [dispatch]
   )
@@ -202,8 +215,7 @@ const DashboardLayout = () => {
             open={userMenuAnchorElement !== null}
             onClose={onUserMenuClose}
           >
-            <MenuItem onClick={onUserMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={onUserMenuClose}>My account</MenuItem>
+            <MenuItem onClick={onUserMenuClose}>Preferences</MenuItem>
             <MenuItem onClick={onLogout}>Log out</MenuItem>
           </Menu>
         </Toolbar>
@@ -267,6 +279,11 @@ const DashboardLayout = () => {
       <CreateEventModal
         open={isCreateEventModalOpen}
         onClose={() => setIsCreateEventModalOpen(false)}
+      />
+
+      <ShareScheduleModal
+        open={isShareScheduleModalOpen}
+        onClose={() => setIsShareScheduleModalOpen(false)}
       />
 
       <Snackbar
