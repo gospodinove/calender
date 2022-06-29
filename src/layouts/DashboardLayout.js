@@ -154,8 +154,13 @@ const DashboardLayout = () => {
     onUserMenuClose()
 
     if (!response.success) {
-      // TODO: Show a toast with error
-      console.log(response.error)
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'toast',
+          data: { type: 'error', message: 'Could not logout' }
+        }
+      })
       return
     }
 

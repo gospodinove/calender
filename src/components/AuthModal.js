@@ -185,7 +185,6 @@ const AuthModal = ({ open, onClose }) => {
               helperText={loginData.errors.password}
               required
             />
-            {/* TODO: Google login */}
           </TabPanel>
 
           <TabPanel value={tabIndex} index={1}>

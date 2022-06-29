@@ -33,7 +33,13 @@ export default function Week({ onTimeSelected }) {
       })
 
       if (!response.success) {
-        // TODO: Error handling
+        dispatch({
+          type: 'modals/show',
+          payload: {
+            modal: 'toast',
+            data: { type: 'error', message: 'Could not load events' }
+          }
+        })
         return
       }
 
