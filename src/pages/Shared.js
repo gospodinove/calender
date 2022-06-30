@@ -1,7 +1,7 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
@@ -19,8 +19,6 @@ export default function Shared() {
 
   const [config, setConfig] = useState()
   const [owner, setOwner] = useState()
-
-  const isAuthenticated = useSelector(store => store.auth.user !== undefined)
 
   const [events, setEvents] = useState([])
 
@@ -69,20 +67,19 @@ export default function Shared() {
 
   const onTimeSelected = useCallback(
     eventData => {
-      if (!isAuthenticated) {
-        dispatch({
-          type: 'modals/show',
-          payload: { modal: 'auth' }
-        })
-        return
-      }
-
       dispatch({
         type: 'modals/show',
-        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
+        payload: {
+          modal: 'createEvent',
+          data: {
+            ...cleanEventData(eventData),
+            isShared: true,
+            scheduleOwnerId: owner?.id
+          }
+        }
       })
     },
-    [dispatch, isAuthenticated]
+    [dispatch, owner]
   )
 
   const getTitle = useCallback(() => {

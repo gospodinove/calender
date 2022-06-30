@@ -75,7 +75,7 @@ router.get('', async (req, res) => {
 
     const events = await db
       .collection('events')
-      .find({ userId: config.userId, start: { $gte: start, $lte: end } })
+      .find({ ownerId: config.userId, start: { $gte: start, $lte: end } })
       .toArray()
 
     const freeSlots = getFreeSlotsInRange(

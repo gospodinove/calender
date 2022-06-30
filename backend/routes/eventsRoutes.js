@@ -11,10 +11,15 @@ const { validationMessages } = require('../validation')
 
 const router = express.Router()
 
-router.post('', isAuthenticated, async (req, res) => {
+router.post('', async (req, res) => {
   const db = req.app.locals.db
 
-  const event = req.body
+  const event = {
+    title: req.body.title,
+    description: req.body.description,
+    start: new Date(req.body.start),
+    end: new Date(req.body.end)
+  }
 
   try {
     const schema = {
@@ -25,24 +30,50 @@ router.post('', isAuthenticated, async (req, res) => {
       end: `required|date`
     }
 
-    await validate(event, schema, validationMessages)
+    if (req.body.isShared) {
+      schema.name = 'required|string'
+      schema.email = 'required|email'
+    }
+
+    await validate(req.body, schema, validationMessages)
 
     try {
       if (isMultidayEvent(event)) {
         const eventSplits = splitMultidayEvent(event).map(e => ({
           ...e,
-          userId: req.session.user.id
+          ownerId: req.body.isShared
+            ? req.body.scheduleOwnerId
+            : req.session.user.id,
+          creatorId: req.session.user?.id,
+          sharedData: req.body.isShared
+            ? {
+                name: req.body.name,
+                email: req.body.email
+              }
+            : undefined
         }))
 
         await db.collection('events').insertMany(eventSplits)
 
         res.json({ success: true, events: eventSplits.map(e => replaceId(e)) })
       } else {
-        await db
-          .collection('events')
-          .insertOne({ ...event, userId: req.session.user.id })
+        const newEvent = {
+          ...event,
+          ownerId: req.body.isShared
+            ? req.body.scheduleOwnerId
+            : req.session.user.id,
+          creatorId: req.session.user?.id,
+          sharedData: req.body.isShared
+            ? {
+                name: req.body.name,
+                email: req.body.email
+              }
+            : undefined
+        }
 
-        res.json({ success: true, event: replaceId(event) })
+        await db.collection('events').insertOne(newEvent)
+
+        res.json({ success: true, event: replaceId(newEvent) })
       }
     } catch (err) {
       sendErrorResponse(res, 500, 'general', 'Could not create event')
@@ -67,7 +98,7 @@ router.get('', isAuthenticated, async (req, res) => {
   try {
     const events = await db
       .collection('events')
-      .find({ userId: req.session.user.id, start: { $gte: start, $lte: end } })
+      .find({ ownerId: req.session.user.id, start: { $gte: start, $lte: end } })
       .toArray()
 
     res.json({ success: true, events: events.map(e => replaceId(e)) })

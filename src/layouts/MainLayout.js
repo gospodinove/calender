@@ -164,6 +164,8 @@ const MainLayout = () => {
   const onLogout = useCallback(async () => {
     const response = await api('logout')
 
+    // TODO: clear events and relative data from redux
+
     onUserMenuClose()
 
     if (!response.success) {

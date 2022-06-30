@@ -10,11 +10,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import Grid from '@mui/material/Grid'
 import { api } from '../utils/api'
+import { Typography } from '@mui/material'
 
 const CreateEventModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
 
   const initialData = useSelector(state => state.modals.createEvent?.data)
+  const user = useSelector(store => store.auth.user)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -22,12 +24,17 @@ const CreateEventModal = ({ open, onClose }) => {
   const [start, setStart] = useState(null)
   const [end, setEnd] = useState(null)
 
+  const [name, setName] = useState()
+  const [email, setEmail] = useState()
+
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
     setStart(initialData ? new Date(initialData.start) : null)
     setEnd(initialData ? new Date(initialData?.end) : null)
-  }, [initialData])
+    setName(user ? user.firstName + ' ' + user.lastName : '')
+    setEmail(user ? user.email : '')
+  }, [initialData, user])
 
   const submit = useCallback(async () => {
     try {
@@ -35,7 +42,11 @@ const CreateEventModal = ({ open, onClose }) => {
         title,
         description,
         start,
-        end
+        end,
+        isShared: initialData?.isShared,
+        name,
+        email,
+        scheduleOwnerId: initialData?.scheduleOwnerId
       })
 
       if (!response.success) {
@@ -68,7 +79,19 @@ const CreateEventModal = ({ open, onClose }) => {
     } catch (err) {
       console.log(err)
     }
-  }, [title, description, start, end, dispatch, onClose, setErrors])
+  }, [
+    title,
+    description,
+    start,
+    end,
+    dispatch,
+    onClose,
+    setErrors,
+    initialData?.scheduleOwnerId,
+    email,
+    initialData?.isShared,
+    name
+  ])
 
   const onCancelClick = useCallback(() => {
     setErrors({})
@@ -88,7 +111,7 @@ const CreateEventModal = ({ open, onClose }) => {
           <TextField
             margin="dense"
             id="event-name"
-            label="Name"
+            label="Title"
             type="text"
             fullWidth
             onChange={event => setTitle(event.target.value)}
@@ -143,6 +166,37 @@ const CreateEventModal = ({ open, onClose }) => {
               />
             </Grid>
           </Grid>
+
+          {initialData?.isShared ? (
+            <>
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Your information
+              </Typography>
+
+              <TextField
+                margin="dense"
+                type="text"
+                label={user ? undefined : 'Name'}
+                fullWidth
+                value={name}
+                onChange={event => setName(event.target.value)}
+                disabled={user ? true : false}
+                error={errors.name !== undefined}
+                helperText={errors.name}
+              />
+              <TextField
+                margin="dense"
+                type="text"
+                label={user ? undefined : 'Email'}
+                fullWidth
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+                disabled={user ? true : false}
+                error={errors.email !== undefined}
+                helperText={errors.email}
+              />
+            </>
+          ) : null}
         </DialogContent>
 
         <DialogActions>
