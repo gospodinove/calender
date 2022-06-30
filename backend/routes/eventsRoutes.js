@@ -55,7 +55,11 @@ router.post('', async (req, res) => {
 
         await db.collection('events').insertMany(eventSplits)
 
-        res.json({ success: true, events: eventSplits.map(e => replaceId(e)) })
+        res.json({
+          success: true,
+          events: eventSplits.map(e => replaceId(e)),
+          isShared: req.body.isShared === true
+        })
       } else {
         const newEvent = {
           ...event,
@@ -73,7 +77,11 @@ router.post('', async (req, res) => {
 
         await db.collection('events').insertOne(newEvent)
 
-        res.json({ success: true, event: replaceId(newEvent) })
+        res.json({
+          success: true,
+          event: replaceId(newEvent),
+          isShared: req.body.isShared === true
+        })
       }
     } catch (err) {
       sendErrorResponse(res, 500, 'general', 'Could not create event')

@@ -4,13 +4,17 @@ const initialState = {
   owner: undefined,
   config: undefined,
   events: [],
-  freeSlots: []
+  freeSlots: [],
+  shouldFetch: true
 }
 
 export const sharedConfigSlice = createSlice({
   name: 'sharedConfig',
   initialState,
   reducers: {
-    set: (_, action) => action.payload
+    set: (_, action) => action.payload,
+    setShouldFetch: (state, action) => {
+      state.shouldFetch = action.payload
+    }
   }
 })

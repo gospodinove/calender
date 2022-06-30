@@ -22,6 +22,8 @@ export default function Shared() {
   const events = useSelector(state => state.sharedConfig.events)
   const freeSlots = useSelector(state => state.sharedConfig.freeSlots)
 
+  const shouldFetch = useSelector(state => state.sharedConfig.shouldFetch)
+
   const fetchSharedSchedule = useCallback(async () => {
     try {
       const response = await api('shared', 'GET', {
@@ -38,8 +40,6 @@ export default function Shared() {
         })
         return
       }
-
-      console.log(response.data)
 
       dispatch({
         type: 'sharedConfig/set',
@@ -64,12 +64,15 @@ export default function Shared() {
   }, [dispatch, params.configId])
 
   useEffect(() => {
-    fetchSharedSchedule()
-  }, [fetchSharedSchedule])
+    if (shouldFetch) {
+      fetchSharedSchedule()
+      dispatch({ type: 'sharedConfig/setShouldFetch', payload: false })
+    }
+  }, [fetchSharedSchedule, shouldFetch])
 
   useEffect(() => {
     if (config?.startDate && !isLoading) {
-      calendarRef.current.getApi().gotoDate(config.startDate)
+      calendarRef.current?.getApi().gotoDate(config.startDate)
     }
   }, [config?.startDate, isLoading])
 

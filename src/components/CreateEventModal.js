@@ -73,11 +73,21 @@ const CreateEventModal = ({ open, onClose }) => {
       // in case of a multiday event an array of events is created and returned
       const payload = response.events ? response.events : response.event
 
-      dispatch({ type: 'events/add', payload })
+      if (response.isShared) {
+        dispatch({ type: 'sharedConfig/setShouldFetch', payload: true })
+      } else {
+        dispatch({ type: 'events/add', payload })
+      }
 
       onClose()
     } catch (err) {
-      console.log(err)
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'toast',
+          data: { type: 'error', message: 'Could not create event' }
+        }
+      })
     }
   }, [
     title,
