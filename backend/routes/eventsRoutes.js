@@ -109,7 +109,15 @@ router.get('', isAuthenticated, async (req, res) => {
       .find({ ownerId: req.session.user.id, start: { $gte: start, $lte: end } })
       .toArray()
 
-    res.json({ success: true, events: events.map(e => replaceId(e)) })
+    res.json({
+      success: true,
+      events: events
+        .map(e => replaceId(e))
+        .map(e => ({
+          ...e,
+          color: e.creatorId !== e.ownerId ? 'purple' : undefined
+        }))
+    })
   } catch (errors) {
     sendErrorResponse(res, 500, 'general', 'Something went wrong')
   }

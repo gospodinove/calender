@@ -146,16 +146,6 @@ export default function Shared() {
               events={[...events, ...freeSlots]}
               headerToolbar={false}
               dayHeaders={config?.type === 'week'}
-              eventColor={
-                owner?.preferences.areSharedEventDetailsHidden
-                  ? 'grey'
-                  : undefined
-              }
-              eventTextColor={
-                owner?.preferences.areSharedEventDetailsHidden
-                  ? 'grey'
-                  : undefined
-              }
               selectConstraint="freeSlot"
               firstDay={1}
             />

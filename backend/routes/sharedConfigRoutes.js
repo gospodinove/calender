@@ -87,11 +87,23 @@ router.get('', async (req, res) => {
       }))
     )
 
+    const addColorsToEvent = event => {
+      if (req.session.user && event.creatorId === req.session.user.id) {
+        event.color = 'purple'
+        event.textColor = 'white'
+      } else if (user.preferences.areSharedEventDetailsHidden) {
+        event.color = 'grey'
+        event.textColor = 'grey'
+      }
+
+      return event
+    }
+
     const result = {
       config,
       freeSlots,
       user: replaceId(user),
-      events: events.map(e => replaceId(e))
+      events: events.map(e => replaceId(e)).map(addColorsToEvent)
     }
 
     res.json({ success: true, data: result })
