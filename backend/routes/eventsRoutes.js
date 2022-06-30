@@ -106,7 +106,13 @@ router.get('', isAuthenticated, async (req, res) => {
   try {
     const events = await db
       .collection('events')
-      .find({ ownerId: req.session.user.id, start: { $gte: start, $lte: end } })
+      .find({
+        $or: [
+          { ownerId: req.session.user.id },
+          { creatorId: req.session.user.id }
+        ],
+        start: { $gte: start, $lte: end }
+      })
       .toArray()
 
     res.json({
