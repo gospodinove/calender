@@ -1,7 +1,7 @@
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
@@ -17,10 +17,10 @@ export default function Shared() {
 
   const calendarRef = useRef(null)
 
-  const [config, setConfig] = useState()
-  const [owner, setOwner] = useState()
-
-  const [events, setEvents] = useState([])
+  const config = useSelector(state => state.sharedConfig.config)
+  const owner = useSelector(state => state.sharedConfig.owner)
+  const events = useSelector(state => state.sharedConfig.events)
+  const freeSlots = useSelector(state => state.sharedConfig.freeSlots)
 
   const fetchSharedSchedule = useCallback(async () => {
     try {
@@ -39,9 +39,17 @@ export default function Shared() {
         return
       }
 
-      setOwner(response.data.user)
-      setConfig(response.data.config)
-      setEvents([...response.data.events, ...response.data.freeSlots])
+      console.log(response.data)
+
+      dispatch({
+        type: 'sharedConfig/set',
+        payload: {
+          owner: response.data.user,
+          config: response.data.config,
+          events: response.data.events,
+          freeSlots: response.data.freeSlots
+        }
+      })
     } catch {
       dispatch({
         type: 'modals/show',
@@ -60,10 +68,14 @@ export default function Shared() {
   }, [fetchSharedSchedule])
 
   useEffect(() => {
-    if (config?.startDate) {
+    if (config?.startDate && !isLoading) {
       calendarRef.current.getApi().gotoDate(config.startDate)
     }
-  }, [config?.startDate])
+  }, [config?.startDate, isLoading])
+
+  useEffect(() => {
+    return () => dispatch({ type: 'events/clearCurrentSharedConfiguration' })
+  })
 
   const onTimeSelected = useCallback(
     eventData => {
@@ -128,7 +140,7 @@ export default function Shared() {
               nowIndicator
               selectable
               select={onTimeSelected}
-              events={events}
+              events={[...events, ...freeSlots]}
               headerToolbar={false}
               dayHeaders={config?.type === 'week'}
               eventColor={
