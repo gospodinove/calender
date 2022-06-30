@@ -1,6 +1,5 @@
 import './App.css'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import DashboardLayout from './layouts/DashboardLayout'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import NotFound from './pages/Page404'
@@ -13,6 +12,8 @@ import { api } from './utils/api'
 import { isEmptyObject } from './utils/objects'
 import { formatDate } from './utils/formatters'
 import { getWeekBoundsForDate } from './utils/dates'
+import Shared from './pages/Shared'
+import MainLayout from './layouts/MainLayout'
 
 function App() {
   const dispatch = useDispatch()
@@ -35,10 +36,12 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<DashboardLayout />}>
+      <Route path="/" element={<MainLayout />}>
         <Route path="day/:date" element={<Day />} />
         <Route path="week/:startDate/:endDate" element={<Week />} />
         <Route path="list" element={<List />} />
+
+        <Route path="shared/:configId" element={<Shared />} />
 
         {/* Auth */}
         <Route path="login" element={<Login />} />

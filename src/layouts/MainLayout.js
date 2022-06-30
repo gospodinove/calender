@@ -31,7 +31,7 @@ import CreateEventModal from '../components/CreateEventModal'
 import ShareScheduleModal from '../components/ShareScheduleModal'
 import UserPreferencesModal from '../components/UserPreferencesModal'
 
-const DashboardLayout = () => {
+const MainLayout = () => {
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
@@ -332,4 +332,4 @@ const DashboardLayout = () => {
   )
 }
 
-export default DashboardLayout
+export default MainLayout

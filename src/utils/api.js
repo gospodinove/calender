@@ -1,7 +1,7 @@
-import { baseUrl } from '../constants'
+import { baseBackendUrl } from '../constants'
 
 export const api = async (endPoint, method = 'GET', data) => {
-  const url = new URL(baseUrl + '/api/' + endPoint)
+  const url = new URL(baseBackendUrl + '/api/' + endPoint)
 
   if (method === 'GET' && data !== undefined) {
     Object.keys(data).forEach(key => url.searchParams.append(key, data[key]))

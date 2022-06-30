@@ -73,7 +73,7 @@ export default function Day() {
         payload: { modal: 'createEvent', data: cleanEventData(eventData) }
       })
     },
-    [dispatch]
+    [dispatch, isAuthenticated]
   )
 
   return (
