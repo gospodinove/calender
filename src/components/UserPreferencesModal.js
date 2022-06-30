@@ -69,10 +69,7 @@ const UserPreferencesModal = ({ open, onClose }) => {
             control={
               <Checkbox
                 checked={areSharedEventDetailsHidden}
-                onChange={e => {
-                  console.log(e.target.checked)
-                  setAreSharedEventDetailsHidden(e.target.checked)
-                }}
+                onChange={e => setAreSharedEventDetailsHidden(e.target.checked)}
               />
             }
             label="Hide events' details when sharing schedule"

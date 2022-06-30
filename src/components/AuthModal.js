@@ -114,11 +114,19 @@ const AuthModal = ({ open, onClose }) => {
           break
         }
         default:
-          console.log('huh?')
           break
       }
     } catch (err) {
-      console.log(err)
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'toast',
+          data: {
+            type: 'error',
+            message: 'Could not ' + (tabIndex === 0 ? 'log in' : 'register')
+          }
+        }
+      })
     }
   }, [submitLogin, submitRegister, tabIndex, onClose])
 

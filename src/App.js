@@ -25,9 +25,7 @@ function App() {
       if (user && !isEmptyObject(user)) {
         dispatch({ type: 'auth/setUser', payload: user })
       }
-    } catch (err) {
-      console.log(err)
-    }
+    } catch {}
   }, [dispatch])
 
   useEffect(() => {
