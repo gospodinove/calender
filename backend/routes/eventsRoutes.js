@@ -39,49 +39,26 @@ router.post('', async (req, res) => {
     await validate(req.body, schema, validationMessages)
 
     try {
-      if (isMultidayEvent(event)) {
-        const eventSplits = splitMultidayEvent(event).map(e => ({
-          ...e,
-          ownerId: req.body.isShared
-            ? req.body.scheduleOwnerId
-            : req.session.user.id,
-          creatorId: req.session.user?.id,
-          sharedData: req.body.isShared
-            ? {
-                name: req.body.name,
-                email: req.body.email
-              }
-            : undefined
-        }))
-
-        await db.collection('events').insertMany(eventSplits)
-
-        res.json({
-          success: true,
-          events: eventSplits.map(e => replaceId(e))
-        })
-      } else {
-        const newEvent = {
-          ...event,
-          ownerId: req.body.isShared
-            ? req.body.scheduleOwnerId
-            : req.session.user.id,
-          creatorId: req.session.user?.id,
-          sharedData: req.body.isShared
-            ? {
-                name: req.body.name,
-                email: req.body.email
-              }
-            : undefined
-        }
-
-        await db.collection('events').insertOne(newEvent)
-
-        res.json({
-          success: true,
-          event: replaceId(newEvent)
-        })
+      const newEvent = {
+        ...event,
+        ownerId: req.body.isShared
+          ? req.body.scheduleOwnerId
+          : req.session.user.id,
+        creatorId: req.session.user?.id,
+        sharedData: req.body.isShared
+          ? {
+              name: req.body.name,
+              email: req.body.email
+            }
+          : undefined
       }
+
+      await db.collection('events').insertOne(newEvent)
+
+      res.json({
+        success: true,
+        event: replaceId(newEvent)
+      })
     } catch (err) {
       sendErrorResponse(res, 500, 'general', 'Could not create event')
     }

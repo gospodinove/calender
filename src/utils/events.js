@@ -11,3 +11,14 @@ export const cleanEventData = data => {
 
   return copy
 }
+
+export const isEventInDateRange = (event, startRange, endRange) => {
+  startRange.setHours(0, 0, 0, 0)
+  endRange.setHours(23, 59, 59, 999)
+
+  return (
+    (startRange <= new Date(event.start) &&
+      new Date(event.start) <= endRange) ||
+    (startRange <= new Date(event.end) && new Date(event.end) <= endRange)
+  )
+}

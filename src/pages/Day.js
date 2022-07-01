@@ -5,10 +5,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
-import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
-import { cleanEventData } from '../utils/events'
+import { cleanEventData, isEventInDateRange } from '../utils/events'
 import Event from '../components/Event'
 
 export default function Day() {
@@ -23,11 +22,7 @@ export default function Day() {
 
   const events = useSelector(store =>
     store.events.filter(event =>
-      isDateInRange(
-        new Date(event.start),
-        new Date(params.date),
-        new Date(params.date)
-      )
+      isEventInDateRange(event, new Date(params.date), new Date(params.date))
     )
   )
 

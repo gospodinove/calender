@@ -5,10 +5,9 @@ import { useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
-import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
-import { cleanEventData } from '../utils/events'
+import { cleanEventData, isEventInDateRange } from '../utils/events'
 import Event from '../components/Event'
 
 export default function Week() {
@@ -23,8 +22,8 @@ export default function Week() {
 
   const events = useSelector(store =>
     store.events.filter(event =>
-      isDateInRange(
-        new Date(event.start),
+      isEventInDateRange(
+        event,
         new Date(params.startDate),
         new Date(params.endDate)
       )
