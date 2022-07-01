@@ -1,12 +1,52 @@
-import { Box, Button, Divider, Paper, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Divider,
+  IconButton,
+  Paper,
+  Stack,
+  Typography
+} from '@mui/material'
 import PropTypes from 'prop-types'
 import HighlightAltIcon from '@mui/icons-material/HighlightAlt'
 import GroupIcon from '@mui/icons-material/Group'
 import { formatTime } from '../utils/formatters'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import { useCallback } from 'react'
+import { api } from '../utils/api'
 
 const Event = ({ eventId }) => {
+  const dispatch = useDispatch()
+
   const event = useSelector(state => state.events.find(e => e.id === eventId))
+  const userId = useSelector(state => state.auth.user?.id)
+
+  const onDeleteClick = useCallback(async () => {
+    try {
+      const response = await api('events', 'DELETE', { id: eventId })
+
+      if (!response.success) {
+        dispatch({
+          type: 'modals/show',
+          payload: {
+            modal: 'toast',
+            data: { type: 'error', message: response.messages }
+          }
+        })
+      }
+
+      dispatch({ type: 'events/remove', payload: eventId })
+    } catch {
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'toast',
+          data: { type: 'error', message: 'Could not delete event' }
+        }
+      })
+    }
+  }, [dispatch, eventId])
 
   return event !== undefined ? (
     <Paper sx={{ padding: 2 }} elevation={3}>
@@ -41,10 +81,15 @@ const Event = ({ eventId }) => {
       ) : null}
 
       <Stack direction="row" justifyContent="flex-end" spacing={1} mt="30px">
-        <Button variant="outlined">Edit</Button>
-        <Button variant="outlined" color="error">
-          Delete
-        </Button>
+        {userId === event.creatorId ? (
+          <IconButton aria-label="edit" color="primary">
+            <EditIcon />
+          </IconButton>
+        ) : null}
+
+        <IconButton aria-label="delete" color="error" onClick={onDeleteClick}>
+          <DeleteIcon />
+        </IconButton>
       </Stack>
     </Paper>
   ) : (

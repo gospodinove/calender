@@ -1,5 +1,6 @@
 const express = require('express')
 const { validate } = require('indicative/validator')
+const { ObjectId } = require('mongodb')
 const isAuthenticated = require('../middleware/isAuthenticated')
 const {
   replaceId,
@@ -124,6 +125,18 @@ router.get('', isAuthenticated, async (req, res) => {
     })
   } catch (errors) {
     sendErrorResponse(res, 500, 'general', 'Something went wrong')
+  }
+})
+
+router.delete('', isAuthenticated, async (req, res) => {
+  const db = req.app.locals.db
+
+  try {
+    await db.collection('events').deleteOne({ _id: ObjectId(req.body.id) })
+
+    res.json({ success: true })
+  } catch {
+    sendErrorResponse(res, 500, 'general', 'Could not delete event')
   }
 })
 

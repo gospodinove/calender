@@ -13,6 +13,7 @@ export const eventsSlice = createSlice({
       ).filter(e => !loadedEventIds.includes(e.id))
 
       return [...state, ...newEvents]
-    }
+    },
+    remove: (state, action) => state.filter(e => e.id !== action.payload)
   }
 })
