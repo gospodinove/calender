@@ -3,12 +3,13 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
 import { isDateInRange } from '../utils/dates'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
 import { cleanEventData } from '../utils/events'
+import Event from '../components/Event'
 
 export default function Week() {
   const params = useParams()
@@ -17,6 +18,8 @@ export default function Week() {
   const isAuthenticated = useSelector(store => store.auth.user !== undefined)
 
   const calendarRef = useRef(null)
+
+  const [selectedEventId, setSelectedEventId] = useState()
 
   const events = useSelector(store =>
     store.events.filter(event =>
@@ -76,6 +79,10 @@ export default function Week() {
     [dispatch, isAuthenticated]
   )
 
+  const onEventClick = useCallback(eventClickData => {
+    setSelectedEventId(eventClickData.event._def.publicId)
+  }, [])
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -100,10 +107,11 @@ export default function Week() {
           selectable
           select={onTimeSelected}
           headerToolbar={false}
+          eventClick={onEventClick}
         />
       </Grid>
       <Grid item xs={3}>
-        Selected event
+        <Event eventId={selectedEventId} />
       </Grid>
     </Grid>
   )

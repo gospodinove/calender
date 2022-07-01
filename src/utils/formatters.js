@@ -16,3 +16,6 @@ export const formatReadableDate = (date, includeWeekday = false) =>
     month: 'long',
     day: 'numeric'
   })
+
+export const formatTime = date =>
+  date.toLocaleTimeString('en-BG', { hour: '2-digit', minute: '2-digit' })
