@@ -168,6 +168,7 @@ const CreateEventModal = ({ open, onClose }) => {
                 label="Start"
                 value={start}
                 onChange={newValue => setStart(newValue)}
+                disabled={isShared}
               />
             </Grid>
             <Grid item xs>
@@ -183,6 +184,7 @@ const CreateEventModal = ({ open, onClose }) => {
                 label="End"
                 value={end}
                 onChange={newValue => setEnd(newValue)}
+                disabled={isShared}
               />
             </Grid>
           </Grid>
