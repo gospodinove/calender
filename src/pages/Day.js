@@ -88,7 +88,7 @@ export default function Day() {
       <Grid item xs={12}>
         <CalendarNavigationBar data={{ type: 'day', date: params.date }} />
       </Grid>
-      <Grid item xs={9}>
+      <Grid item xs={12} md={9}>
         <FullCalendar
           ref={calendarRef}
           plugins={[timeGridPlugin, interactionPlugin]}
@@ -104,7 +104,7 @@ export default function Day() {
           eventClick={onEventClick}
         />
       </Grid>
-      <Grid item xs={3}>
+      <Grid item xs={12} md={3}>
         <Event eventId={selectedEventId} />
       </Grid>
     </Grid>
