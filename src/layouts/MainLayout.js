@@ -13,23 +13,12 @@ import ListIcon from '@mui/icons-material/ListAlt'
 import TeamIcon from '@mui/icons-material/Group'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { drawerWidth } from '../utils/layout'
-import AuthModal from '../components/AuthModal'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  Alert,
-  AppBar,
-  Menu,
-  MenuItem,
-  Snackbar,
-  Toolbar,
-  Typography
-} from '@mui/material'
+import { AppBar, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
-import CreateEventModal from '../components/CreateEventModal'
-import ShareScheduleModal from '../components/ShareScheduleModal'
-import UserPreferencesModal from '../components/UserPreferencesModal'
+import ModalsContainer from '../components/ModalsContainer'
 
 const MainLayout = () => {
   const dispatch = useDispatch()
@@ -41,58 +30,20 @@ const MainLayout = () => {
 
   const user = useSelector(state => state.auth.user)
 
-  const isAuthModalOpen = useSelector(state => state.modals.auth?.open ?? false)
-  const setIsAuthModalOpen = useCallback(
-    open =>
+  const openAuthModal = useCallback(
+    () =>
       dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
+        type: 'modals/show',
         payload: { modal: 'auth' }
       }),
     [dispatch]
   )
 
-  const isCreateEventModalOpen = useSelector(
-    state => state.modals.createEvent?.open ?? false
-  )
-  const setIsCreateEventModalOpen = useCallback(
-    (open, data) =>
-      dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
-        payload: { modal: 'createEvent', data }
-      }),
-    [dispatch]
-  )
-
-  const isShareScheduleModalOpen = useSelector(
-    state => state.modals.shareSchedule?.open ?? false
-  )
-  const setIsShareScheduleModalOpen = useCallback(
-    open =>
-      dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
-        payload: { modal: 'shareSchedule' }
-      }),
-    [dispatch]
-  )
-
-  const isUserPreferencesModalOpen = useSelector(
-    state => state.modals.userPreferences?.open ?? false
-  )
-  const setIsUserPreferencesModalOpen = useCallback(
-    open =>
-      dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
-        payload: { modal: 'userPreferences' }
-      }),
-    [dispatch]
-  )
-
-  const toastData = useSelector(state => state.modals.toast)
-  const hideToast = useCallback(
+  const openUserPreferencesModal = useCallback(
     () =>
       dispatch({
-        type: 'modals/hide',
-        payload: { modal: 'toast' }
+        type: 'modals/show',
+        payload: { modal: 'userPreferences' }
       }),
     [dispatch]
   )
@@ -152,13 +103,13 @@ const MainLayout = () => {
   const onUserMenuClick = useCallback(
     event => {
       if (!user) {
-        setIsAuthModalOpen(true)
+        openAuthModal()
         return
       }
 
       onUserMenuToggle(event)
     },
-    [setIsAuthModalOpen, onUserMenuToggle, user]
+    [openAuthModal, onUserMenuToggle, user]
   )
 
   const onLogout = useCallback(async () => {
@@ -184,8 +135,8 @@ const MainLayout = () => {
 
   const onPreferencesClick = useCallback(() => {
     onUserMenuClose()
-    setIsUserPreferencesModalOpen(true)
-  }, [onUserMenuClose, setIsUserPreferencesModalOpen])
+    openUserPreferencesModal()
+  }, [onUserMenuClose, openUserPreferencesModal])
 
   const container = window !== undefined ? window.document.body : undefined
 
@@ -296,40 +247,7 @@ const MainLayout = () => {
         <Outlet />
       </Box>
 
-      <AuthModal
-        open={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
-
-      <CreateEventModal
-        open={isCreateEventModalOpen}
-        onClose={() => setIsCreateEventModalOpen(false)}
-      />
-
-      <ShareScheduleModal
-        open={isShareScheduleModalOpen}
-        onClose={() => setIsShareScheduleModalOpen(false)}
-      />
-
-      <UserPreferencesModal
-        open={isUserPreferencesModalOpen}
-        onClose={() => setIsUserPreferencesModalOpen(false)}
-      />
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={toastData?.open ?? false}
-        autoHideDuration={6000}
-        onClose={hideToast}
-      >
-        <Alert
-          onClose={hideToast}
-          severity={toastData?.data.type}
-          sx={{ width: '100%' }}
-        >
-          {toastData?.data.message}
-        </Alert>
-      </Snackbar>
+      <ModalsContainer />
     </Box>
   )
 }
