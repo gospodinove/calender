@@ -2,12 +2,7 @@ const express = require('express')
 const { validate } = require('indicative/validator')
 const { ObjectId } = require('mongodb')
 const isAuthenticated = require('../middleware/isAuthenticated')
-const {
-  replaceId,
-  sendErrorResponse,
-  isMultidayEvent,
-  splitMultidayEvent
-} = require('../utils')
+const { replaceId, sendErrorResponse } = require('../utils')
 const { validationMessages } = require('../validation')
 
 const router = express.Router()
