@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import Grid from '@mui/material/Grid'
 import { api } from '../utils/api'
-import { Typography } from '@mui/material'
+import { Box, Divider, Typography } from '@mui/material'
 
 const CreateEventModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
@@ -29,6 +29,9 @@ const CreateEventModal = ({ open, onClose }) => {
 
   const [errors, setErrors] = useState({})
 
+  const isShared =
+    initialData?.isShared && initialData?.scheduleOwnerId !== user?.id
+
   useEffect(() => {
     setStart(initialData ? new Date(initialData.start) : null)
     setEnd(initialData ? new Date(initialData?.end) : null)
@@ -43,7 +46,7 @@ const CreateEventModal = ({ open, onClose }) => {
         description,
         start,
         end,
-        isShared: initialData?.isShared,
+        isShared,
         name,
         email,
         scheduleOwnerId: initialData?.scheduleOwnerId
@@ -73,7 +76,7 @@ const CreateEventModal = ({ open, onClose }) => {
       // in case of a multiday event an array of events is created and returned
       const payload = response.events ? response.events : response.event
 
-      if (response.isShared) {
+      if (initialData?.isShared) {
         dispatch({ type: 'sharedConfig/setShouldFetch', payload: true })
       } else {
         dispatch({ type: 'events/add', payload })
@@ -99,8 +102,9 @@ const CreateEventModal = ({ open, onClose }) => {
     setErrors,
     initialData?.scheduleOwnerId,
     email,
-    initialData?.isShared,
-    name
+    isShared,
+    name,
+    initialData?.isShared
   ])
 
   const onCancelClick = useCallback(() => {
@@ -118,6 +122,12 @@ const CreateEventModal = ({ open, onClose }) => {
         }}
       >
         <DialogContent>
+          {isShared && user ? (
+            <Typography mb={3}>
+              This event will appear in your schedule as well
+            </Typography>
+          ) : null}
+
           <TextField
             margin="dense"
             id="event-name"
@@ -177,11 +187,9 @@ const CreateEventModal = ({ open, onClose }) => {
             </Grid>
           </Grid>
 
-          {initialData?.isShared ? (
-            <>
-              <Typography variant="h6" sx={{ mt: 2 }}>
-                Your information
-              </Typography>
+          {isShared ? (
+            <Box>
+              <Divider sx={{ mt: 3, mb: 1 }}>Your information</Divider>
 
               <TextField
                 margin="dense"
@@ -205,7 +213,7 @@ const CreateEventModal = ({ open, onClose }) => {
                 error={errors.email !== undefined}
                 helperText={errors.email}
               />
-            </>
+            </Box>
           ) : null}
         </DialogContent>
 

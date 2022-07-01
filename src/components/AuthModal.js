@@ -128,7 +128,7 @@ const AuthModal = ({ open, onClose }) => {
         }
       })
     }
-  }, [submitLogin, submitRegister, tabIndex, onClose])
+  }, [submitLogin, submitRegister, tabIndex, onClose, dispatch])
 
   const clearTabData = useCallback(() => {
     setLoginData(loginDataInitialState)

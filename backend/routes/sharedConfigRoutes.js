@@ -88,7 +88,11 @@ router.get('', async (req, res) => {
     )
 
     const addColorsToEvent = event => {
-      if (req.session.user && event.creatorId === req.session.user.id) {
+      if (
+        req.session.user &&
+        event.creatorId === req.session.user.id &&
+        event.creatorId !== event.ownerId
+      ) {
         event.color = 'purple'
         event.textColor = 'white'
       } else if (user.preferences.areSharedEventDetailsHidden) {

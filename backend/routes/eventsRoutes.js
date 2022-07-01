@@ -24,7 +24,7 @@ router.post('', async (req, res) => {
   try {
     const schema = {
       title: 'required|string',
-      description: 'string|max:250',
+      description: 'string',
       // TODO: before/after validation
       start: `required|date`,
       end: `required|date`
@@ -57,8 +57,7 @@ router.post('', async (req, res) => {
 
         res.json({
           success: true,
-          events: eventSplits.map(e => replaceId(e)),
-          isShared: req.body.isShared === true
+          events: eventSplits.map(e => replaceId(e))
         })
       } else {
         const newEvent = {
@@ -79,8 +78,7 @@ router.post('', async (req, res) => {
 
         res.json({
           success: true,
-          event: replaceId(newEvent),
-          isShared: req.body.isShared === true
+          event: replaceId(newEvent)
         })
       }
     } catch (err) {

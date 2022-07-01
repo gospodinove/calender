@@ -68,7 +68,7 @@ export default function Shared() {
       fetchSharedSchedule()
       dispatch({ type: 'sharedConfig/setShouldFetch', payload: false })
     }
-  }, [fetchSharedSchedule, shouldFetch])
+  }, [fetchSharedSchedule, shouldFetch, dispatch])
 
   useEffect(() => {
     if (config?.startDate && !isLoading) {
