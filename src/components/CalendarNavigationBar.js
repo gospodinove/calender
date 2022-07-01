@@ -64,7 +64,7 @@ const CalendarNavigationBar = ({ data }) => {
         data: { ...data, configId: response.configId }
       }
     })
-  }, [dispatch, data])
+  }, [dispatch, data, isAuthenticated])
 
   const onNextPress = useCallback(() => {
     switch (data.type) {
