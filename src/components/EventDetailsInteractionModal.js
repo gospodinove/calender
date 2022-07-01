@@ -12,10 +12,16 @@ import Grid from '@mui/material/Grid'
 import { api } from '../utils/api'
 import { Box, Divider, Typography } from '@mui/material'
 
-const CreateEventModal = ({ open, onClose }) => {
+const EventDetailsInteractionModal = ({ open, onClose }) => {
   const dispatch = useDispatch()
 
-  const initialData = useSelector(state => state.modals.createEvent?.data)
+  const initialData = useSelector(
+    state => state.modals.eventDetailsInteraction?.data.data
+  )
+  const interactionType = useSelector(
+    state => state.modals.eventDetailsInteraction?.data.type
+  )
+
   const user = useSelector(store => store.auth.user)
 
   const [title, setTitle] = useState('')
@@ -30,18 +36,27 @@ const CreateEventModal = ({ open, onClose }) => {
   const [errors, setErrors] = useState({})
 
   const isShared =
-    initialData?.isShared && initialData?.scheduleOwnerId !== user?.id
+    interactionType === 'edit'
+      ? initialData?.sharedData !== null &&
+        initialData?.sharedData !== undefined
+      : initialData?.isShared && initialData?.scheduleOwnerId !== user?.id
 
   useEffect(() => {
     setStart(initialData ? new Date(initialData.start) : null)
-    setEnd(initialData ? new Date(initialData?.end) : null)
+    setEnd(initialData ? new Date(initialData.end) : null)
+
+    setTitle(interactionType === 'edit' ? initialData?.title ?? '' : '')
+    setDescription(
+      interactionType === 'edit' ? initialData?.description ?? '' : ''
+    )
+
     setName(user ? user.firstName + ' ' + user.lastName : '')
     setEmail(user ? user.email : '')
-  }, [initialData, user])
+  }, [initialData, user, interactionType])
 
   const submit = useCallback(async () => {
     try {
-      const response = await api('events', 'POST', {
+      const payload = {
         title,
         description,
         start,
@@ -49,8 +64,15 @@ const CreateEventModal = ({ open, onClose }) => {
         isShared,
         name,
         email,
-        scheduleOwnerId: initialData?.scheduleOwnerId
-      })
+        scheduleOwnerId: initialData?.scheduleOwnerId,
+        id: interactionType === 'edit' ? initialData?.id : undefined
+      }
+
+      const response = await api(
+        'events',
+        interactionType === 'create' ? 'POST' : 'PUT',
+        payload
+      )
 
       if (!response.success) {
         switch (response.messageType) {
@@ -73,13 +95,33 @@ const CreateEventModal = ({ open, onClose }) => {
         }
       }
 
-      // in case of a multiday event an array of events is created and returned
-      const payload = response.events ? response.events : response.event
+      switch (interactionType) {
+        case 'create':
+          // in case of a multiday event an array of events is created and returned
+          const payload = response.events ? response.events : response.event
 
-      if (initialData?.isShared) {
-        dispatch({ type: 'sharedConfig/setShouldFetch', payload: true })
-      } else {
-        dispatch({ type: 'events/add', payload })
+          if (initialData?.isShared) {
+            dispatch({ type: 'sharedConfig/setShouldFetch', payload: true })
+          } else {
+            dispatch({ type: 'events/add', payload })
+          }
+          break
+
+        case 'edit':
+          dispatch({
+            type: 'events/update',
+            payload: {
+              id: initialData?.id,
+              title,
+              description,
+              start: start.toISOString(),
+              end: end.toISOString()
+            }
+          })
+          break
+
+        default:
+          break
       }
 
       onClose()
@@ -88,7 +130,12 @@ const CreateEventModal = ({ open, onClose }) => {
         type: 'modals/show',
         payload: {
           modal: 'toast',
-          data: { type: 'error', message: 'Could not create event' }
+          data: {
+            type: 'error',
+            message: `Could not ${
+              interactionType === 'create' ? 'create' : 'udpate'
+            } event`
+          }
         }
       })
     }
@@ -100,11 +147,11 @@ const CreateEventModal = ({ open, onClose }) => {
     dispatch,
     onClose,
     setErrors,
-    initialData?.scheduleOwnerId,
+    initialData,
     email,
     isShared,
     name,
-    initialData?.isShared
+    interactionType
   ])
 
   const onCancelClick = useCallback(() => {
@@ -114,7 +161,9 @@ const CreateEventModal = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
-      <DialogTitle>Create event</DialogTitle>
+      <DialogTitle>
+        {`${interactionType === 'create' ? 'Create' : 'Edit'} event`}
+      </DialogTitle>
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -122,7 +171,7 @@ const CreateEventModal = ({ open, onClose }) => {
         }}
       >
         <DialogContent>
-          {isShared && user ? (
+          {isShared && user && interactionType === 'create' ? (
             <Typography mb={3}>
               This event will appear in your schedule as well
             </Typography>
@@ -134,6 +183,7 @@ const CreateEventModal = ({ open, onClose }) => {
             label="Title"
             type="text"
             fullWidth
+            value={title}
             onChange={event => setTitle(event.target.value)}
             error={errors.title !== undefined}
             helperText={errors.title}
@@ -149,6 +199,7 @@ const CreateEventModal = ({ open, onClose }) => {
             label="Description"
             type="text"
             fullWidth
+            value={description}
             onChange={event => setDescription(event.target.value)}
             error={errors.description !== undefined}
             helperText={errors.description}
@@ -221,16 +272,18 @@ const CreateEventModal = ({ open, onClose }) => {
 
         <DialogActions>
           <Button onClick={onCancelClick}>Cancel</Button>
-          <Button type="submit">Submit</Button>
+          <Button type="submit">
+            {interactionType === 'create' ? 'Create' : 'Save'}
+          </Button>
         </DialogActions>
       </form>
     </Dialog>
   )
 }
 
-CreateEventModal.propTypes = {
+EventDetailsInteractionModal.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func
 }
 
-export default CreateEventModal
+export default EventDetailsInteractionModal

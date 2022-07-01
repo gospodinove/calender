@@ -72,7 +72,10 @@ export default function Week() {
 
       dispatch({
         type: 'modals/show',
-        payload: { modal: 'createEvent', data: cleanEventData(eventData) }
+        payload: {
+          modal: 'eventDetailsInteraction',
+          data: { type: 'create', data: cleanEventData(eventData) }
+        }
       })
     },
     [dispatch, isAuthenticated]

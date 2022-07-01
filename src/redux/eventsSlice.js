@@ -14,6 +14,12 @@ export const eventsSlice = createSlice({
 
       return [...state, ...newEvents]
     },
-    remove: (state, action) => state.filter(e => e.id !== action.payload)
+    remove: (state, action) => state.filter(e => e.id !== action.payload),
+    update: (state, action) => {
+      const oldEvent = state.find(e => e.id === action.payload.id)
+      const newEvent = { ...oldEvent, ...action.payload }
+
+      return [...state.filter(e => e.id !== action.payload.id), newEvent]
+    }
   }
 })

@@ -112,4 +112,41 @@ router.delete('', isAuthenticated, async (req, res) => {
   }
 })
 
+router.put('', isAuthenticated, async (req, res) => {
+  const db = req.app.locals.db
+
+  const eventId = req.body.id
+
+  const event = {
+    title: req.body.title,
+    description: req.body.description,
+    start: new Date(req.body.start),
+    end: new Date(req.body.end)
+  }
+
+  try {
+    const schema = {
+      title: 'required|string',
+      description: 'string',
+      // TODO: before/after validation
+      start: `required|date`,
+      end: `required|date`
+    }
+
+    await validate(req.body, schema, validationMessages)
+
+    try {
+      await db
+        .collection('events')
+        .updateOne({ _id: ObjectId(eventId) }, { $set: { ...event } })
+
+      res.json({ success: true })
+    } catch (err) {
+      sendErrorResponse(res, 500, 'general', 'Could not update event')
+    }
+  } catch (errors) {
+    sendErrorResponse(res, 500, 'field-error', errors)
+  }
+})
+
 module.exports = router

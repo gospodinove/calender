@@ -22,6 +22,18 @@ const Event = ({ eventId }) => {
   const event = useSelector(state => state.events.find(e => e.id === eventId))
   const userId = useSelector(state => state.auth.user?.id)
 
+  const onEditClick = useCallback(
+    () =>
+      dispatch({
+        type: 'modals/show',
+        payload: {
+          modal: 'eventDetailsInteraction',
+          data: { type: 'edit', data: event }
+        }
+      }),
+    [dispatch, event]
+  )
+
   const onDeleteClick = useCallback(async () => {
     try {
       const response = await api('events', 'DELETE', { id: eventId })
@@ -82,7 +94,7 @@ const Event = ({ eventId }) => {
 
       <Stack direction="row" justifyContent="flex-end" spacing={1} mt="30px">
         {userId === event.creatorId ? (
-          <IconButton aria-label="edit" color="primary">
+          <IconButton aria-label="edit" color="primary" onClick={onEditClick}>
             <EditIcon />
           </IconButton>
         ) : null}

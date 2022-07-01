@@ -2,7 +2,7 @@ import { Alert, Snackbar } from '@mui/material'
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import AuthModal from './AuthModal'
-import CreateEventModal from './CreateEventModal'
+import EventDetailsInteractionModal from './EventDetailsInteractionModal'
 import ShareScheduleModal from './ShareScheduleModal'
 import UserPreferencesModal from './UserPreferencesModal'
 
@@ -10,23 +10,23 @@ const ModalsContainer = () => {
   const dispatch = useDispatch()
 
   const isAuthModalOpen = useSelector(state => state.modals.auth?.open ?? false)
-  const setIsAuthModalOpen = useCallback(
-    open =>
+  const closeIsAuthModal = useCallback(
+    () =>
       dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
+        type: 'modals/hide',
         payload: { modal: 'auth' }
       }),
     [dispatch]
   )
 
-  const isCreateEventModalOpen = useSelector(
-    state => state.modals.createEvent?.open ?? false
+  const isEventDetailsInteractionModalOpen = useSelector(
+    state => state.modals.eventDetailsInteraction?.open ?? false
   )
-  const setIsCreateEventModalOpen = useCallback(
-    (open, data) =>
+  const closeEventDetailsInteractionModal = useCallback(
+    () =>
       dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
-        payload: { modal: 'createEvent', data }
+        type: 'modals/hide',
+        payload: { modal: 'eventDetailsInteraction' }
       }),
     [dispatch]
   )
@@ -34,10 +34,10 @@ const ModalsContainer = () => {
   const isShareScheduleModalOpen = useSelector(
     state => state.modals.shareSchedule?.open ?? false
   )
-  const setIsShareScheduleModalOpen = useCallback(
-    open =>
+  const closeShareScheduleModal = useCallback(
+    () =>
       dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
+        type: 'modals/hide',
         payload: { modal: 'shareSchedule' }
       }),
     [dispatch]
@@ -46,10 +46,10 @@ const ModalsContainer = () => {
   const isUserPreferencesModalOpen = useSelector(
     state => state.modals.userPreferences?.open ?? false
   )
-  const setIsUserPreferencesModalOpen = useCallback(
-    open =>
+  const closeUserPreferencesModal = useCallback(
+    () =>
       dispatch({
-        type: `modals/${open ? 'show' : 'hide'}`,
+        type: 'modals/hide',
         payload: { modal: 'userPreferences' }
       }),
     [dispatch]
@@ -67,24 +67,21 @@ const ModalsContainer = () => {
 
   return (
     <>
-      <AuthModal
-        open={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
+      <AuthModal open={isAuthModalOpen} onClose={closeIsAuthModal} />
 
-      <CreateEventModal
-        open={isCreateEventModalOpen}
-        onClose={() => setIsCreateEventModalOpen(false)}
+      <EventDetailsInteractionModal
+        open={isEventDetailsInteractionModalOpen}
+        onClose={closeEventDetailsInteractionModal}
       />
 
       <ShareScheduleModal
         open={isShareScheduleModalOpen}
-        onClose={() => setIsShareScheduleModalOpen(false)}
+        onClose={closeShareScheduleModal}
       />
 
       <UserPreferencesModal
         open={isUserPreferencesModalOpen}
-        onClose={() => setIsUserPreferencesModalOpen(false)}
+        onClose={closeUserPreferencesModal}
       />
 
       <Snackbar

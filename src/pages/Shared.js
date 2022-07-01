@@ -85,11 +85,14 @@ export default function Shared() {
       dispatch({
         type: 'modals/show',
         payload: {
-          modal: 'createEvent',
+          modal: 'eventDetailsInteraction',
           data: {
-            ...cleanEventData(eventData),
-            isShared: true,
-            scheduleOwnerId: owner?.id
+            type: 'create',
+            data: {
+              ...cleanEventData(eventData),
+              isShared: true,
+              scheduleOwnerId: owner?.id
+            }
           }
         }
       })
