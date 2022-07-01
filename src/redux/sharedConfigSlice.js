@@ -15,6 +15,7 @@ export const sharedConfigSlice = createSlice({
     set: (_, action) => action.payload,
     setShouldFetch: (state, action) => {
       state.shouldFetch = action.payload
-    }
+    },
+    clear: () => initialState
   }
 })

@@ -20,6 +20,7 @@ export const eventsSlice = createSlice({
       const newEvent = { ...oldEvent, ...action.payload }
 
       return [...state.filter(e => e.id !== action.payload.id), newEvent]
-    }
+    },
+    clear: () => initialState
   }
 })

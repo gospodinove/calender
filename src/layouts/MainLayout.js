@@ -67,6 +67,7 @@ const MainLayout = () => {
     const items = [
       { title: 'Day', icon: <ViewDayIcon />, route: 'day' },
       { title: 'Week', icon: <ViewWeekIcon />, route: 'week' },
+      // TODO: List view
       { title: 'List', icon: <ListIcon />, route: 'list' },
       { title: 'Teams', icon: <TeamIcon />, route: 'teams' }
     ]
@@ -115,7 +116,9 @@ const MainLayout = () => {
   const onLogout = useCallback(async () => {
     const response = await api('logout')
 
-    // TODO: clear events and relative data from redux
+    dispatch({ type: 'auth/clear' })
+    dispatch({ type: 'events/clear' })
+    dispatch({ type: 'sharedConfig/clear' })
 
     onUserMenuClose()
 

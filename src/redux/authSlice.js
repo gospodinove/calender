@@ -13,6 +13,7 @@ export const authSlice = createSlice({
     },
     updatePrefs: (state, action) => {
       state.user = { ...state.user, preferences: action.payload }
-    }
+    },
+    clear: () => initialState
   }
 })
