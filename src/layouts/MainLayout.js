@@ -9,7 +9,6 @@ import ViewWeekIcon from '@mui/icons-material/ViewWeek'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import ListIcon from '@mui/icons-material/ListAlt'
 import TeamIcon from '@mui/icons-material/Group'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { drawerWidth } from '../utils/layout'
@@ -19,6 +18,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { api } from '../utils/api'
 import ModalsContainer from '../components/ModalsContainer'
+import MapIcon from '@mui/icons-material/Map'
 
 const MainLayout = () => {
   const dispatch = useDispatch()
@@ -67,9 +67,8 @@ const MainLayout = () => {
     const items = [
       { title: 'Day', icon: <ViewDayIcon />, route: 'day' },
       { title: 'Week', icon: <ViewWeekIcon />, route: 'week' },
-      // TODO: List view
-      { title: 'List', icon: <ListIcon />, route: 'list' },
-      { title: 'Teams', icon: <TeamIcon />, route: 'teams' }
+      { title: 'Teams', icon: <TeamIcon />, route: 'teams' },
+      { title: 'Places', icon: <MapIcon />, route: 'places' }
     ]
 
     return (

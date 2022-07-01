@@ -4,7 +4,6 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import NotFound from './pages/Page404'
 import Day from './pages/Day'
-import List from './pages/List'
 import Week from './pages/Week'
 import { useDispatch } from 'react-redux'
 import { useCallback, useEffect } from 'react'
@@ -14,6 +13,7 @@ import { formatDate } from './utils/formatters'
 import { getWeekBoundsForDate } from './utils/dates'
 import Shared from './pages/Shared'
 import MainLayout from './layouts/MainLayout'
+import ComingSoon from './pages/ComingSoon'
 
 function App() {
   const dispatch = useDispatch()
@@ -37,9 +37,11 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         <Route path="day/:date" element={<Day />} />
         <Route path="week/:startDate/:endDate" element={<Week />} />
-        <Route path="list" element={<List />} />
 
         <Route path="shared/:configId" element={<Shared />} />
+
+        <Route path="teams" element={<ComingSoon />} />
+        <Route path="places" element={<ComingSoon />} />
 
         {/* Auth */}
         <Route path="login" element={<Login />} />
