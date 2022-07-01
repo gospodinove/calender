@@ -33,7 +33,6 @@ const parseValidationErrorMessages = errors => {
   return result
 }
 
-// TODO: add business hours to preferences
 module.exports.getFreeSlotsInRange = function (
   startDate,
   endDate,

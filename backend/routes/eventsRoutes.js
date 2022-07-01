@@ -21,7 +21,6 @@ router.post('', async (req, res) => {
     const schema = {
       title: 'required|string',
       description: 'string',
-      // TODO: before/after validation
       start: `required|date`,
       end: `required|date`
     }
@@ -128,7 +127,6 @@ router.put('', isAuthenticated, async (req, res) => {
     const schema = {
       title: 'required|string',
       description: 'string',
-      // TODO: before/after validation
       start: `required|date`,
       end: `required|date`
     }
