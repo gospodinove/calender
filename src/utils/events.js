@@ -1,3 +1,5 @@
+import { adjustHoursOfDateFromFullcallendar } from './dates'
+
 export const cleanEventData = data => {
   const copy = data
 
@@ -22,3 +24,15 @@ export const isEventInDateRange = (event, startRange, endRange) => {
     (startRange <= new Date(event.end) && new Date(event.end) <= endRange)
   )
 }
+
+export const parseEventClickData = eventClickData => ({
+  title: eventClickData.event._def.title,
+  id: eventClickData.event._def.publicId,
+  start: adjustHoursOfDateFromFullcallendar(
+    eventClickData.event._instance.range.start
+  ),
+  end: adjustHoursOfDateFromFullcallendar(
+    eventClickData.event._instance.range.end
+  ),
+  ...eventClickData.event._def.extendedProps
+})

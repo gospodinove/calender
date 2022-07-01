@@ -7,7 +7,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
 import CalendarNavigationBar from '../components/CalendarNavigationBar'
 import { Grid } from '@mui/material'
-import { cleanEventData, isEventInDateRange } from '../utils/events'
+import {
+  cleanEventData,
+  isEventInDateRange,
+  parseEventClickData
+} from '../utils/events'
 import Event from '../components/Event'
 
 export default function Day() {
@@ -18,7 +22,7 @@ export default function Day() {
 
   const isAuthenticated = useSelector(store => store.auth.user !== undefined)
 
-  const [selectedEventId, setSelectedEventId] = useState()
+  const [selectedEvent, setSelectedEvent] = useState()
 
   const events = useSelector(store =>
     store.events.filter(event =>
@@ -54,7 +58,7 @@ export default function Day() {
   useEffect(() => {
     calendarRef.current.getApi().gotoDate(params.date)
     fetchEvents()
-  }, [fetchEvents, params.date])
+  }, [fetchEvents, params.date, isAuthenticated])
 
   const onTimeSelected = useCallback(
     eventData => {
@@ -78,7 +82,8 @@ export default function Day() {
   )
 
   const onEventClick = useCallback(eventClickData => {
-    setSelectedEventId(eventClickData.event._def.publicId)
+    const event = parseEventClickData(eventClickData)
+    setSelectedEvent(event)
   }, [])
 
   return (
@@ -103,7 +108,11 @@ export default function Day() {
         />
       </Grid>
       <Grid item xs={12} md={3}>
-        <Event eventId={selectedEventId} />
+        <Event
+          event={selectedEvent}
+          emptyMessage="Select event"
+          onDelete={() => setSelectedEvent(undefined)}
+        />
       </Grid>
     </Grid>
   )

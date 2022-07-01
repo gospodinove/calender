@@ -5,15 +5,19 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../utils/api'
-import { Box, CircularProgress, Typography } from '@mui/material'
-import { cleanEventData } from '../utils/events'
+import { Box, CircularProgress, Grid, Typography } from '@mui/material'
+import { cleanEventData, parseEventClickData } from '../utils/events'
 import { formatReadableDate } from '../utils/formatters'
+import Event from '../components/Event'
 
 export default function Shared() {
   const params = useParams()
   const dispatch = useDispatch()
 
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedEvent, setSelectedEvent] = useState()
+
+  const userId = useSelector(state => state.auth.user?.id)
 
   const calendarRef = useRef(null)
 
@@ -120,41 +124,67 @@ export default function Shared() {
     )
   }, [config, owner])
 
+  const onEventClick = useCallback(
+    eventClickData => {
+      if (
+        !userId ||
+        eventClickData.event._def.extendedProps.creatorId !== userId
+      ) {
+        return
+      }
+
+      const event = parseEventClickData(eventClickData)
+
+      setSelectedEvent(event)
+    },
+    [userId]
+  )
+
   return (
-    <>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        {getTitle()}
-      </Typography>
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-      >
-        <Box sx={{ maxWidth: config?.type === 'day' ? '50%' : '70%' }}>
-          {isLoading ? (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant="h5" sx={{ mb: 2 }}>
+          {getTitle()}
+        </Typography>
+      </Grid>
+      <Grid item xs={12} md={9}>
+        {isLoading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="100vh"
+          >
             <CircularProgress />
-          ) : (
-            <FullCalendar
-              ref={calendarRef}
-              plugins={[timeGridPlugin, interactionPlugin]}
-              initialView={
-                config?.type === 'day' ? 'timeGridDay' : 'timeGridWeek'
-              }
-              allDaySlot={false}
-              height="auto"
-              nowIndicator
-              selectable
-              select={onTimeSelected}
-              events={[...events, ...freeSlots]}
-              headerToolbar={false}
-              dayHeaders={config?.type === 'week'}
-              selectConstraint="freeSlot"
-              firstDay={1}
-            />
-          )}
-        </Box>
-      </Box>
-    </>
+          </Box>
+        ) : (
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[timeGridPlugin, interactionPlugin]}
+            initialView={
+              config?.type === 'day' ? 'timeGridDay' : 'timeGridWeek'
+            }
+            allDaySlot={false}
+            height="auto"
+            nowIndicator
+            selectable
+            select={onTimeSelected}
+            events={[...events, ...freeSlots]}
+            headerToolbar={false}
+            dayHeaders={config?.type === 'week'}
+            selectConstraint="freeSlot"
+            firstDay={1}
+            eventClick={onEventClick}
+          />
+        )}
+      </Grid>
+      <Grid item xs={12} md={3}>
+        <Event
+          event={selectedEvent}
+          emptyMessage="Select event you created"
+          onDelete={() => setSelectedEvent(undefined)}
+        />
+      </Grid>
+    </Grid>
   )
 }

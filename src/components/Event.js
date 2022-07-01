@@ -16,10 +16,9 @@ import EditIcon from '@mui/icons-material/Edit'
 import { useCallback } from 'react'
 import { api } from '../utils/api'
 
-const Event = ({ eventId }) => {
+const Event = ({ event, emptyMessage, onDelete }) => {
   const dispatch = useDispatch()
 
-  const event = useSelector(state => state.events.find(e => e.id === eventId))
   const userId = useSelector(state => state.auth.user?.id)
 
   const onEditClick = useCallback(
@@ -36,7 +35,7 @@ const Event = ({ eventId }) => {
 
   const onDeleteClick = useCallback(async () => {
     try {
-      const response = await api('events', 'DELETE', { id: eventId })
+      const response = await api('events', 'DELETE', { id: event.id })
 
       if (!response.success) {
         dispatch({
@@ -48,7 +47,9 @@ const Event = ({ eventId }) => {
         })
       }
 
-      dispatch({ type: 'events/remove', payload: eventId })
+      dispatch({ type: 'events/remove', payload: event.id })
+
+      onDelete()
     } catch {
       dispatch({
         type: 'modals/show',
@@ -58,7 +59,7 @@ const Event = ({ eventId }) => {
         }
       })
     }
-  }, [dispatch, eventId])
+  }, [dispatch, event, onDelete])
 
   return event !== undefined ? (
     <Paper sx={{ padding: 2 }} elevation={3}>
@@ -113,14 +114,16 @@ const Event = ({ eventId }) => {
     >
       <Stack alignItems="center">
         <HighlightAltIcon fontSize="large" />
-        <Typography variant="h6">Select event</Typography>
+        <Typography variant="h6">{emptyMessage}</Typography>
       </Stack>
     </Box>
   )
 }
 
 Event.propTypes = {
-  eventId: PropTypes.string
+  event: PropTypes.object,
+  emptyMessage: PropTypes.string,
+  onDelete: PropTypes.func
 }
 
 export default Event

@@ -18,3 +18,10 @@ export const isDateInRange = (date, startRange, endRange) => {
 
 export const addDaysToDate = (days, date) =>
   new Date(date.setDate(date.getDate() + days))
+
+export const adjustHoursOfDateFromFullcallendar = date => {
+  const result = new Date(date)
+  result.setHours(result.getHours() - 3)
+
+  return result.toISOString()
+}
