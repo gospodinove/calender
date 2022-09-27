@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(logger('dev'))
 
 MongoClient.connect(
-  `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@realmcluster.hhded.mongodb.net/?retryWrites=true&w=majority`
+  `mongodb+srv://${process.env.MONGO_DB_USER}:${process.env.MONGO_DB_PASSWORD}@cluster0.y6cuuqa.mongodb.net/?retryWrites=true&w=majority`
 )
   .then(client => {
     app.locals.db = client.db('calender')
